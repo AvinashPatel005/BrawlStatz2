@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "295524056238",
+    "firebase_url": "https://brawlstatz2-7dd0c-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "brawlstatz2-7dd0c",
+    "storage_bucket": "brawlstatz2-7dd0c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:295524056238:android:a81a82446623585ca0413f",
+        "android_client_info": {
+          "package_name": "com.kal.brawlstatz2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "295524056238-8icfsp0p32h83gj3d75pjl6qvam3bltg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCe5pQyTicaMM9nhVtMbHTYmfy0mSR5DHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "295524056238-8icfsp0p32h83gj3d75pjl6qvam3bltg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
