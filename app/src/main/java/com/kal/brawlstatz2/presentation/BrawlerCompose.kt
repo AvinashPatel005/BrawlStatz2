@@ -39,7 +39,7 @@ import com.kal.brawlstatz2.ui.theme.BrawlStatz2Theme
 import com.kal.brawlstatz2.ui.theme.legendary
 
 @Composable
-fun ShowBrawlersList(brawler: MutableList<Brawler>) {
+fun ShowBrawlersList(brawler: List<Brawler>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ){
@@ -132,7 +132,7 @@ fun ImageAsync(url:String, placeholder : Int) {
         model = url,
         contentDescription = null,
         modifier = Modifier
-            .fillMaxHeight()
+            .fillMaxHeight().aspectRatio(1f)
             .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp)),
     ){
@@ -146,20 +146,10 @@ fun ImageAsync1(url:String, placeholder : Int) {
         model = url,
         contentDescription = null,
         modifier = Modifier
-            .size(44.dp)
+            .size(40.dp)
             .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp)),
     ){
         it.placeholder(placeholder).fitCenter()
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun CardPreview() {
-    BrawlStatz2Theme {
-        BrawlerCard(Brawler("AVINASH","MYTHIC","","","","","","","","","","","","","","","","","","","","","","",
-            null,legendary))
     }
 }

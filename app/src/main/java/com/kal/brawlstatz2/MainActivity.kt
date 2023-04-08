@@ -3,19 +3,17 @@ package com.kal.brawlstatz2
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -26,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -34,18 +33,18 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.kal.brawlstatz2.data.BottomNavItem
 import com.kal.brawlstatz2.presentation.ShowBrawlersList
-import com.kal.brawlstatz2.sealed.DataState
+import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.ui.theme.BrawlStatz2Theme
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
-    private val viewModel : MainViewModel by viewModels()
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             BrawlStatz2Theme {
-                
+                val viewModel = viewModel<MainViewModel>()
                     var isSearch by remember {
                         mutableStateOf(false)
                     }
@@ -103,7 +102,7 @@ class MainActivity : ComponentActivity() {
                                                      value = value,
                                                      onValueChange = {
                                                          value = it
-                                                         viewModel.findData(value.lowercase())
+                                                         viewModel.sort(value.lowercase())
                                                      },
                                                      modifier = Modifier
                                                          .focusRequester(focusRequester)
@@ -119,7 +118,6 @@ class MainActivity : ComponentActivity() {
                                                      if(value=="") isSearch = !isSearch
                                                      else {
                                                          value=""
-                                                         viewModel.findData(value.lowercase())
                                                      }
 
                                                  }){
@@ -137,7 +135,7 @@ class MainActivity : ComponentActivity() {
                                                      DropdownMenu(
                                                          expanded = showMenu,
                                                          onDismissRequest = { showMenu=false }) {
-                                                         DropdownMenuItem(onClick = { viewModel.sortData()
+                                                         DropdownMenuItem(onClick = {
                                                                  showMenu=false}, leadingIcon = {Icon(
                                                              Icons.Filled.Call,
                                                              contentDescription = null)
@@ -148,7 +146,6 @@ class MainActivity : ComponentActivity() {
                                                          )
 
                                                          DropdownMenuItem(onClick = {
-                                                             viewModel.findData("")
                                                              showMenu=false
                                                                                     }, leadingIcon = {Icon(
                                                              Icons.Filled.Call,
@@ -197,17 +194,24 @@ class MainActivity : ComponentActivity() {
     }
     @Composable
     fun Navigation(navController: NavHostController) {
+        val viewModel = viewModel<MainViewModel>()
+
+        val brawlers = viewModel.blist.value
+        val Meta = viewModel.mlist.value
+        val isLoading = viewModel.isLoading.value
         NavHost(navController = navController, startDestination = "brawler" ){
             composable("brawler"){
-                SetDataBrawler(viewModel)
+                if(isLoading) CircularProgressIndicator()
+                ShowBrawlersList(brawler = brawlers)
                 
             }
             composable("map"){
+                if(isLoading) CircularProgressIndicator()
                 SetDataMap()
             }
             composable("meta"){
-
-                SetDataMeta(viewModel)
+                if(isLoading) CircularProgressIndicator()
+                ShowMetaList(brawler = Meta)
             }
         }
     }
@@ -247,86 +251,15 @@ fun BottomNavBar(
 
 
 @Composable
-fun SetDataBrawler(viewModel: MainViewModel) {
-    viewModel.BrawlerClicked()
-    when (val result = viewModel.response.value) {
-
-        is DataState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-        is DataState.Sorted -> {
-            ShowBrawlersList(brawler = result.data)
-        }
-        is DataState.Success -> {
-            ShowBrawlersList(brawler = result.data)
-        }
-        is DataState.Failure -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = result.message)
-            }
-        }
-        else -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Error")
-            }
-        }
-
-    }
+fun SetDataBrawler() {
+    Text(text = "Brawler Coming soon")
 }
-    @Composable
-    fun SetDataMeta(viewModel:MainViewModel) {
-        viewModel.metaClicked()
-        when(val result = viewModel.response.value){
-            is DataState.Loading ->{
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ){
-                    CircularProgressIndicator()
-                }
-            }
-
-            is DataState.Meta ->{
-                ShowBrawlersList(brawler = result.data)
-            }
-            is DataState.Failure ->{
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ){
-                    Text(text = result.message)
-                }
-            }
-            else ->{
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ){
-                    Text(text = "Errorr")
-                }
-            }
-
-        }
-    }
-
+@Composable
+fun SetDataMeta() {
+    Text(text = "META Coming soon")
+}
 @Composable
 fun SetDataMap() {
-    Text(text = "META Coming soon")
+    Text(text = "MAP Coming soon")
+
 }

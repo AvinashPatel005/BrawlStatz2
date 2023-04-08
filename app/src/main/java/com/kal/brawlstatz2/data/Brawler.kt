@@ -27,9 +27,16 @@ data class Brawler(
     val bsupert: String?=null,
     var trait: String?=null,
     val tier: String?=null,
+    val bstarpower: String?=null,
+    val bgadget: String?=null,
+    var bgear1: String?=null,
+    var bgear2: String?=null,
+    var bgear3: String?=null,
+    val zver : String?=null,
     var color : Color=Color.Black
+
 ){
-    constructor() :this(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+    constructor() :this(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
         Color.Black)
 }
 
