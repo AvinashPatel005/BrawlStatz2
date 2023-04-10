@@ -1,25 +1,33 @@
 package com.kal.brawlstatz2
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -27,19 +35,19 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import com.google.accompanist.navigation.animation.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.kal.brawlstatz2.data.BottomNavItem
+import com.kal.brawlstatz2.presentation.ShimmerListItem
 import com.kal.brawlstatz2.presentation.ShowBrawlersList
 import com.kal.brawlstatz2.presentation.ShowMetaList
-import com.kal.brawlstatz2.ui.theme.BrawlStatz2Theme
+import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
-
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -62,7 +70,17 @@ class MainActivity : ComponentActivity() {
                     }
                 var showMenu by remember { mutableStateOf(false) }
                     val focusManager = LocalFocusManager.current
-                    val navController = rememberNavController()
+                    val navController = rememberAnimatedNavController()
+                navController.enableOnBackPressed(enabled = false)
+                val activity = (LocalContext.current as? Activity)
+                BackHandler() {
+                    if(navController.currentDestination?.route  == "brawler") activity?.finish()
+                    else {
+                        navController.navigate("brawler")
+                        isSearchVisible=true
+                        isSearch=false
+                    }
+                }
                     LaunchedEffect(key1 = isVisible, key2 = isSearch){
                         if(isVisible&&isSearch){
                             focusManager.clearFocus()
@@ -72,6 +90,7 @@ class MainActivity : ComponentActivity() {
                             focusManager.clearFocus()
                         }
                     }
+
                     Scaffold(
                         topBar = {
                                  Column() {
@@ -82,81 +101,78 @@ class MainActivity : ComponentActivity() {
                                                  Text(
                                                      "BrawlStatz2",
                                                      maxLines = 1,
-                                                     overflow = TextOverflow.Ellipsis
+                                                     overflow = TextOverflow.Ellipsis,
+                                                     color = Color.White,
+                                                     fontWeight = FontWeight.Bold,
+                                                     fontFamily = FontFamily.Serif
                                                  )
                                              }
                                          },
-                                         colors = TopAppBarDefaults.topAppBarColors(Color(0xFF022C65)),
+                                         colors = TopAppBarDefaults.topAppBarColors(Color(0xFF000000)),
                                          navigationIcon = {
                                              Icon(
                                                  painter = painterResource(id = R.drawable.logo_menu),
                                                  contentDescription = null,
-                                                 modifier = Modifier.padding(start = 10.dp, end = 4.dp)
+                                                 modifier = Modifier.padding(start = 10.dp, end = 4.dp),
+                                                 tint = Color.White
                                              )
                                          },
 
                                          actions = {
-                                             if(isSearch&&isSearchVisible){
-                                                 isVisible = !isVisible
-                                                 OutlinedTextField(
-                                                     value = value,
-                                                     onValueChange = {
-                                                         value = it
-                                                         viewModel.sort(value.lowercase())
-                                                     },
-                                                     modifier = Modifier
-                                                         .focusRequester(focusRequester)
-                                                         .width(200.dp),
-                                                     label = {
-                                                         Text(text = "Search")
-                                                     },
-                                                     placeholder = { Text(text = "Name, Rarity, etc.")}
-                                                 )
+
+                                                 Row(
+                                                     verticalAlignment = Alignment.CenterVertically
+                                                 ){
+                                                     if (isSearch && isSearchVisible) {
+                                                         isVisible = !isVisible
+                                                         OutlinedTextField(
+                                                             value = value,
+                                                             onValueChange = {
+                                                                 viewModel.isSearching.value = true
+                                                                 value = it
+                                                                 viewModel.find(value.lowercase())
+                                                             },
+                                                             modifier = Modifier
+                                                                 .focusRequester(focusRequester)
+                                                                 .scale(scaleY = 0.9F, scaleX = 1F),
+
+                                                             placeholder = { Text(text = "Search") },
+                                                             shape = RoundedCornerShape(100),
+                                                             colors = OutlinedTextFieldDefaults.colors(
+                                                                 focusedContainerColor = PurpleGrey40,
+                                                                 unfocusedContainerColor = PurpleGrey40,
+                                                                 disabledContainerColor = PurpleGrey40,
+                                                                 focusedBorderColor = Color.Black,
+                                                                 unfocusedBorderColor = Color.Black,
+                                                                 cursorColor = PurpleGrey80
+                                                             )
+                                                         )
+                                                     }
+                                                     Card(
+                                                         modifier = Modifier.clip(RoundedCornerShape(100))
+                                                     ) {
+                                                     if(isSearchVisible) {
+                                                         IconButton(onClick = {
+                                                             if (value == "") {
+                                                                 isSearch = !isSearch
+                                                                 viewModel.isSearching.value = false
+                                                             }
+                                                             else {
+                                                                 value = ""
+                                                                 viewModel.find(value.lowercase())
+                                                             }
+
+                                                         }) {
+                                                             Icon(
+                                                                 if (isSearch) Icons.Default.Close
+                                                                 else Icons.Default.Search,
+                                                                 contentDescription = "search"
+                                                             )
+
+                                                         }
+                                                     }
+                                                 }
                                              }
-                                             if(isSearchVisible){
-                                                 IconButton(onClick = {
-                                                     if(value=="") isSearch = !isSearch
-                                                     else {
-                                                         value=""
-                                                     }
-
-                                                 }){
-                                                     Icon(
-                                                         if(isSearch) Icons.Default.Close
-                                                         else Icons.Default.Search ,
-                                                         contentDescription = "search"
-                                                     )
-
-                                                 }
-                                                 IconButton(onClick = { showMenu = true }) {
-                                                     Icon(Icons.Default.MoreVert, contentDescription = null )
-                                                 }
-
-                                                     DropdownMenu(
-                                                         expanded = showMenu,
-                                                         onDismissRequest = { showMenu=false }) {
-                                                         DropdownMenuItem(onClick = {
-                                                                 showMenu=false}, leadingIcon = {Icon(
-                                                             Icons.Filled.Call,
-                                                             contentDescription = null)
-                                                         },
-                                                             text = {
-                                                                 Text("Epic")
-                                                             }
-                                                         )
-
-                                                         DropdownMenuItem(onClick = {
-                                                             showMenu=false
-                                                                                    }, leadingIcon = {Icon(
-                                                             Icons.Filled.Call,
-                                                             contentDescription = null)
-                                                         },
-                                                             text = {
-                                                                 Text("Call")
-                                                             }
-                                                         )
-                                                     }
-                                                 }
                                          }
                                      )
                                      BottomNavBar(
@@ -169,6 +185,10 @@ class MainActivity : ComponentActivity() {
                                          navController = navController,
                                          onItemClicked = {
                                              isSearchVisible=it.route=="brawler"
+                                             isSearch=false
+                                             value = ""
+                                             viewModel.isSearching.value=false
+                                             viewModel.find(value.lowercase())
                                              navController.navigate(it.route)
                                          }
                                      )
@@ -181,7 +201,7 @@ class MainActivity : ComponentActivity() {
                                     top = it.calculateTopPadding(),
                                     bottom = it.calculateBottomPadding()
                                 )
-                                .background(Color(0xFF021835))
+                                .background(Color(0xFF000000))
                         ){
                             Navigation(navController = navController)
                             Divider()
@@ -192,25 +212,49 @@ class MainActivity : ComponentActivity() {
             }
 
     }
+    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     fun Navigation(navController: NavHostController) {
         val viewModel = viewModel<MainViewModel>()
-
         val brawlers = viewModel.blist.value
         val Meta = viewModel.mlist.value
         val isLoading = viewModel.isLoading.value
-        NavHost(navController = navController, startDestination = "brawler" ){
-            composable("brawler"){
-                if(isLoading) CircularProgressIndicator()
-                ShowBrawlersList(brawler = brawlers)
+        val isSearching = viewModel.isSearching.value
+        AnimatedNavHost(navController = navController, startDestination = "brawler" ){
+            composable("brawler",
+                enterTransition = {
+                    fadeIn(animationSpec = tween(300))
+
+                }
+                ){
+                if(isLoading){
+                    LazyColumn(modifier = Modifier.fillMaxSize()){
+                        items(20){
+                            ShimmerListItem(
+                                modifier = Modifier
+                                    .background(Color.Black)
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            )
+                        }
+                    }
+                }
+
+                ShowBrawlersList(brawler = brawlers,isSearching)
                 
             }
-            composable("map"){
-                if(isLoading) CircularProgressIndicator()
+            composable("map",
+                enterTransition = {
+                    fadeIn(animationSpec = tween(300))
+                }
+                ){
                 SetDataMap()
             }
-            composable("meta"){
-                if(isLoading) CircularProgressIndicator()
+            composable("meta",
+                enterTransition = {
+                    fadeIn(animationSpec = tween(300))
+                }
+            ){
                 ShowMetaList(brawler = Meta)
             }
         }
@@ -228,7 +272,7 @@ fun BottomNavBar(
     NavigationBar(
         modifier = modifier.height(50.dp),
         tonalElevation = 0.dp,
-        containerColor = Color(0xFF022C65),
+        containerColor = Color(0xFF000000),
     ){
        items.forEach{
            val selected = it.route == backStackEntry.value?.destination?.route

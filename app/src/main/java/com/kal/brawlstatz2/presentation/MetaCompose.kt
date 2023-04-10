@@ -87,7 +87,7 @@ fun ShowMetaList(brawler: List<Brawler>) {
                         .fillMaxWidth()
                         .padding(start = 2.dp, end = 2.dp, top = 2.dp)
                         .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
-                        color = Color(0xFF022C65),
+                        color = Color(0xFF111010),
                     ){
                        Row(Modifier.fillMaxSize().padding(start = 4.dp), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Bottom) {
                            Text(
@@ -124,7 +124,7 @@ fun ShowMetaList(brawler: List<Brawler>) {
                         .padding(start = 2.dp, end = 2.dp, bottom = 2.dp)
                         .height(10.dp)
                         .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)),
-                        color = Color(0xFF022C65),
+                        color = Color(0xFF111010),
                     ){
 
                     }
@@ -155,7 +155,7 @@ fun MetaCard(
                     .fillMaxWidth()
                     .padding(start = 2.dp, end = 2.dp)
                     .height(cardHeight),
-                color = Color(0xFF022C65)
+                color = Color(0xFF111010)
             ){
                 Box(
                     modifier = Modifier
@@ -173,7 +173,7 @@ fun MetaCard(
                     ){
                         Row(
                         ) {
-                            brawler.bpro?.let { ImageAsync(url = it,placeholder = R.drawable.placeholder1) }
+                            brawler.bpro?.let { ImageAsync(url = it,placeholder = R.drawable.placeholder1,86.dp) }
                             Spacer(modifier = Modifier.width(4.dp))
                             Column {
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -239,8 +239,8 @@ fun MetaCard(
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun ImageAsync2(string:String) {
-    GlideImage(model = string, contentDescription = null,modifier = Modifier
+fun ImageAsync2(string:String,modifier: Modifier=Modifier) {
+    GlideImage(model = string, contentDescription = null,modifier =modifier
         .size(20.dp)
         .padding(end = 2.dp))
 }

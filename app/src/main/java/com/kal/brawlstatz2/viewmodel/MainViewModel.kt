@@ -1,7 +1,4 @@
 package com.kal.brawlstatz2.viewmodel
-import android.content.ContentValues
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -17,22 +14,26 @@ class MainViewModel : ViewModel() {
     val blist: MutableState<List<Brawler>> = mutableStateOf(listOf())
     val mlist: MutableState<List<Brawler>> = mutableStateOf(listOf())
     val isLoading : MutableState<Boolean> = mutableStateOf(true)
+    var size : Int=0
+    var isSearching : MutableState<Boolean> = mutableStateOf(false)
     init {
         fetchData()
     }
-    fun sort(txt:String){
+    fun find(txt:String){
         val sortedlist :ArrayList<Brawler> = ArrayList()
         for(brawler in list){
             if(brawler.bname?.lowercase()?.startsWith(txt) == true||brawler.brare?.lowercase()?.startsWith(txt) == true){
                sortedlist.add(brawler)
             }
         }
+
         blist.value=sortedlist
     }
     private fun fetchData(){
         FirebaseDatabase.getInstance().getReference("brawlers")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    list.clear()
                     for(DataSnap in snapshot.children){
                         val brawler = DataSnap.getValue(Brawler::class.java)
                         if (brawler != null) {
@@ -74,6 +75,7 @@ class MainViewModel : ViewModel() {
                         }
                         if(brawler!=null) list.add(brawler)
                     }
+                    size = list.size
                     blist.value=list
                     mlist.value=list.sortedBy { it.tier }
                     isLoading.value=false
