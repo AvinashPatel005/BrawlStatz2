@@ -1,11 +1,5 @@
 package com.kal.brawlstatz2.presentation
 
-import android.content.ContentValues.TAG
-import android.util.Log
-import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,20 +33,18 @@ import com.kal.brawlstatz2.R
 import com.kal.brawlstatz2.data.Brawler
 import com.kal.brawlstatz2.data.ExpandableCardModel
 import com.kal.brawlstatz2.viewmodel.CardsViewModel
-import com.kal.brawlstatz2.viewmodel.MainViewModel
-import kotlin.math.log
 
 @Composable
-fun ShowBrawlersList(brawler: List<Brawler>, isSearching: Boolean) {
+fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean) {
     val cardModel = viewModel<CardsViewModel>()
-    val viewModel = viewModel<MainViewModel>()
-    if(isSearching&&brawler.isNotEmpty()) cardModel.c1list.value = ExpandableCardModel(brawler[0].bname,true)
-    else cardModel.c1list.value = ExpandableCardModel(null,false)
+    if (isSearching && brawler.isNotEmpty()) cardModel.c1list.value =
+        ExpandableCardModel(brawler[0].bname, true)
+    else cardModel.c1list.value = ExpandableCardModel(null, false)
     LazyColumn(
         modifier = Modifier.fillMaxSize()
-    ){
-        items(brawler){
-            BrawlerCard(brawler = it,cardModel)
+    ) {
+        items(brawler) {
+            BrawlerCard(brawler = it, cardModel)
         }
     }
 }
@@ -61,12 +53,13 @@ fun ShowBrawlersList(brawler: List<Brawler>, isSearching: Boolean) {
 @Composable
 fun BrawlerCard(
     brawler: Brawler,
-    CardModel: CardsViewModel
-){
+    cardModel: CardsViewModel
+) {
     val cardId = brawler.bname
-    val cardHeight : Dp = 92.dp
+    val cardHeight: Dp = 92.dp
 
-    val isExp = (CardModel.c1list.value.isExpanded&& CardModel.c1list.value.id==brawler.bname)
+    val isExp = (cardModel.c1list.value.isExpanded && cardModel.c1list.value.id == brawler.bname)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,19 +69,12 @@ fun BrawlerCard(
         elevation = CardDefaults.cardElevation(10.dp),
         colors = CardDefaults.cardColors(Color(0xFF111010)),
         onClick = {
-            if(isExp)  {
-                CardModel.c1list.value = ExpandableCardModel(cardId,false)
-            }
-            else  {
-                CardModel.c1list.value = ExpandableCardModel(cardId,true)
-            }
-
+            if (isExp) cardModel.c1list.value = ExpandableCardModel(cardId, false)
+            else cardModel.c1list.value = ExpandableCardModel(cardId, true)
         }
-
     ){
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ){
             Column {
                 Row(
@@ -102,66 +88,70 @@ fun BrawlerCard(
                             bottom = if (isExp) 0.dp else 4.dp
                         ),
                     horizontalArrangement = Arrangement.SpaceBetween
-                ){
-                    Row(
-                    ) {
-                        brawler.bpro?.let { ImageAsync(url = it,placeholder = com.kal.brawlstatz2.R.drawable.placeholder1,if(isExp) 110.dp else 86.dp) }
+                ) {
+                    Row {
+                        ImageAsync(
+                            url = brawler.bpro.toString(),
+                            placeholder = R.drawable.placeholder1,
+                            modifier = Modifier.size(if (isExp) 110.dp else 86.dp)
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
                         Column {
                             Spacer(modifier = Modifier.height(8.dp))
-                            brawler.bname?.let {
-                                Text(
-                                    text = it,
-                                    fontSize = 19.sp,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    style = TextStyle(
-                                        shadow = Shadow(offset = Offset(1f,1f), blurRadius = 1f),
-                                    )
+                            Text(
+                                text = brawler.bname.toString(),
+                                fontSize = 19.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                style = TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f),
                                 )
-                            }
-                            brawler.brare?.let {
-                                Text(
-                                    text = it,
-                                    fontSize = 10.sp,
-                                    fontStyle = FontStyle.Italic,
-                                    color = brawler.color,
-                                    fontFamily = FontFamily.Serif,
-                                    fontWeight = FontWeight.Bold,
-                                    style = TextStyle(
-                                        shadow = Shadow(offset = Offset(1f,1f), blurRadius = 1f)
-                                    )
+                            )
+                            Text(
+                                text = brawler.brare.toString(),
+                                fontSize = 10.sp,
+                                fontStyle = FontStyle.Italic,
+                                color = brawler.color,
+                                fontFamily = FontFamily.Serif,
+                                fontWeight = FontWeight.Bold,
+                                style = TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f)
                                 )
-                            }
+                            )
                         }
                     }
                     Row(
                         modifier = Modifier.align(Alignment.Bottom),
                     ) {
-                        Column {
-                            brawler.c1?.let { ImageAsync1(url = it,placeholder = com.kal.brawlstatz2.R.drawable.placeholder2) }
-                            if(isExp) brawler.c1n?.let { Text(text = it, fontSize = 8.sp, textAlign = TextAlign.Center,modifier = Modifier.width(43.dp), color = Color.White, fontStyle = FontStyle.Italic)}
-                        }
+                        CounterColumn(
+                            url = brawler.c1.toString(),
+                            name = brawler.c1n.toString(),
+                            placeholder = R.drawable.placeholder4,
+                            isExp = isExp
+                        )
                         Spacer(modifier = Modifier.width(2.dp))
-                        Column {
-                            brawler.c2?.let { ImageAsync1(url = it,placeholder = com.kal.brawlstatz2.R.drawable.placeholder1) }
-                            if(isExp) brawler.c2n?.let { Text(text = it, fontSize = 8.sp, textAlign = TextAlign.Center,modifier = Modifier.width(43.dp), color = Color.White, fontStyle = FontStyle.Italic) }
-                        }
+                        CounterColumn(
+                            url = brawler.c2.toString(),
+                            name = brawler.c2n.toString(),
+                            placeholder = R.drawable.placeholder3,
+                            isExp = isExp
+                        )
                         Spacer(modifier = Modifier.width(2.dp))
-                        Column {
-                            brawler.c3?.let { ImageAsync1(url = it,placeholder = com.kal.brawlstatz2.R.drawable.placeholder3) }
-                            if(isExp) brawler.c3n?.let { Text(text = it, fontSize = 8.sp, textAlign = TextAlign.Center,modifier = Modifier.width(43.dp), color = Color.White, fontStyle = FontStyle.Italic) }
-                        }
-
+                        CounterColumn(
+                            url = brawler.c3.toString(),
+                            name = brawler.c3n.toString(),
+                            placeholder = R.drawable.placeholder2,
+                            isExp = isExp
+                        )
                     }
                 }
 
+                //Expandable Part
                 if(isExp){
                     Box(modifier = Modifier
                         .fillMaxWidth()
                         .padding(6.dp)
                     ){
-
                         Column {
                             var clicked by remember {
                                 mutableStateOf(0)
@@ -197,75 +187,32 @@ fun BrawlerCard(
                                     .fillMaxHeight()
                                     .fillMaxWidth(0.5f),
                                     contentAlignment = Alignment.CenterStart
-                                ){
+                                ) {
 
-                                    Column(
-                                    ) {
-                                        Box {
-                                            Box(
-                                                modifier = Modifier.height(35.dp),
-                                                contentAlignment = Alignment.BottomStart
-                                            ){
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .height(25.dp)
-                                                        .background(Color.Gray).clickable {
-                                                            clicked = 5
-                                                        }
-                                                )
+                                    Column {
+                                        BarPreview(
+                                            moveName = brawler.battack.toString(),
+                                            previewText = "ATTACK",
+                                            previewIcon = R.drawable.attack,
+                                            previewColor = Color(0xfffd9798),
+                                            clicked = clicked == 5,
+                                            onClick = {
+                                                clicked = 5
                                             }
-                                            Column(
-                                                modifier = Modifier.height(35.dp).padding(start = 43.dp),
-                                            ) {
-                                                Text("ATTACK", fontSize = 12.sp, color = Color(0xfffd9798), style = MaterialTheme.typography.bodyMedium+ TextStyle(
-                                                    shadow =  Shadow(offset = Offset(1f,1f), blurRadius = 1f)) )
-                                                Text(brawler.battack.toString().uppercase(), fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold ,style = MaterialTheme.typography.bodyMedium , modifier = Modifier.offset(y = (-4).dp))
+                                        )
+                                        BarPreview(
+                                            moveName = brawler.bsuper.toString(),
+                                            previewText = "SUPER",
+                                            previewIcon = R.drawable.mainsuper,
+                                            previewColor = Color(0xffffc11d),
+                                            clicked = clicked == 6,
+                                            onClick = {
+                                                clicked = 6
                                             }
-                                            Image(painter = painterResource(id = R.drawable.attack), contentDescription = null, modifier = Modifier
-                                                .size(35.dp)
-                                                .background(Color.Transparent))
-                                            if(clicked==5){
-                                                Image(painter = painterResource(id = R.drawable.atacksuperborder), contentDescription = null, modifier = Modifier
-                                                    .size(35.dp)
-                                                    .background(Color.Transparent))
-
-                                            }
-                                        }
-                                        Box {
-                                            Box(
-                                                modifier = Modifier.height(35.dp),
-                                                contentAlignment = Alignment.BottomStart
-                                            ){
-                                                Box(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .height(25.dp)
-                                                        .background(Color.Gray).clickable {
-                                                            clicked = 6
-                                                        }
-                                                )
-                                            }
-                                            Column(
-                                                modifier = Modifier.height(35.dp).padding(start = 43.dp),
-                                            ) {
-                                                Text("SUPER", fontSize = 12.sp, color = Color(0xffffc11d), style = MaterialTheme.typography.bodyMedium+ TextStyle(
-                                                    shadow =  Shadow(offset = Offset(1f,1f), blurRadius = 1f)) )
-                                                Text(brawler.bsuper.toString().uppercase(), fontSize = 14.sp, color = Color.White, fontWeight = FontWeight.Bold ,style = MaterialTheme.typography.bodyMedium, modifier = Modifier.offset(y = (-4).dp))
-                                            }
-                                            Image(painter = painterResource(id = R.drawable.mainsuper), contentDescription = null, modifier = Modifier
-                                                .size(35.dp)
-                                                .background(Color.Transparent))
-                                            if(clicked==6){
-                                                Image(painter = painterResource(id = R.drawable.atacksuperborder), contentDescription = null, modifier = Modifier
-                                                    .size(35.dp)
-                                                    .background(Color.Transparent))
-
-                                            }
-                                        }
+                                        )
                                     }
-
                                 }
+
                                 Box(modifier = Modifier
                                     .fillMaxSize(),
                                     contentAlignment = Alignment.BottomCenter
@@ -273,64 +220,41 @@ fun BrawlerCard(
                                     Row(
                                         modifier = Modifier.height(54.dp)
                                     ) {
-
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            brawler.g1?.let { ImageAsync2(string = it, modifier = Modifier
-                                                .size(40.dp)
-                                                .clickable {
-                                                    clicked = 1
-                                                }) }
-                                            Spacer(modifier = Modifier.height(2.dp))
-                                            if(clicked==1)
-                                            Image(painter = painterResource(id = R.drawable.arrow), contentDescription = null, modifier = Modifier.height(12.dp))
-                                        }
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            brawler.g2?.let { ImageAsync2(string = it, modifier = Modifier
-                                                .size(40.dp)
-                                                .clickable {
-                                                    clicked = 2
-                                                }) }
-                                            Spacer(modifier = Modifier.height(2.dp))
-                                            if(clicked==2)
-                                            Image(painter = painterResource(id = R.drawable.arrow), contentDescription = null, modifier = Modifier.height(12.dp))
-                                        }
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            brawler.s1?.let { ImageAsync2(string = it, modifier = Modifier
-                                                .size(40.dp)
-                                                .clickable {
-                                                    clicked = 3
-                                                }) }
-                                            Spacer(modifier = Modifier.height(2.dp))
-                                            if(clicked==3)
-                                            Image(painter = painterResource(id = R.drawable.arrow), contentDescription = null, modifier = Modifier.height(12.dp))
-                                        }
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                        ) {
-                                            brawler.s2?.let { ImageAsync2(string = it, modifier = Modifier
-                                                .size(40.dp)
-                                                .clickable {
-                                                    clicked = 4
-                                                }) }
-                                            Spacer(modifier = Modifier.height(2.dp))
-                                            if(clicked==4)
-                                            Image(painter = painterResource(id = R.drawable.arrow), contentDescription = null, modifier = Modifier.height(12.dp))
-                                        }
-
+                                        StarGadget(
+                                            url = brawler.g1.toString(),
+                                            clicked = clicked == 1,
+                                            onClick = {
+                                                clicked = 1
+                                            }
+                                        )
+                                        StarGadget(
+                                            url = brawler.g2.toString(),
+                                            clicked = clicked == 2,
+                                            onClick = {
+                                                clicked = 2
+                                            }
+                                        )
+                                        StarGadget(
+                                            url = brawler.s1.toString(),
+                                            clicked = clicked == 3,
+                                            onClick = {
+                                                clicked = 3
+                                            }
+                                        )
+                                        StarGadget(
+                                            url = brawler.s2.toString(),
+                                            clicked = clicked == 4,
+                                            onClick = {
+                                                clicked = 4
+                                            }
+                                        )
                                     }
                                 }
-
                             }
                             var hide by remember {
                                 mutableStateOf(false)
                             }
-                            var t = ""
+                            val t: String
                             when(clicked){
                                 1->{
                                     t = brawler.g1t.toString()
@@ -361,74 +285,178 @@ fun BrawlerCard(
                                     hide = true
                                 }
                             }
-                            if(!hide){
-                                Box(modifier = Modifier
-                                    .fillMaxSize()){
-                                    Box(modifier = Modifier
-                                        .border(1.dp, Color.White, RoundedCornerShape(10.dp))
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(Color.White).padding(horizontal = 2.dp)
-                                        .fillMaxWidth()
-                                        .height(24.dp),
-                                        contentAlignment = Alignment.Center
-                                    ){
-                                        Text(
-                                            text = t,
-                                            fontSize = 9.sp,
-                                            fontStyle = FontStyle.Italic,
-                                            style = TextStyle(
-                                                textIndent = TextIndent(0.sp),
-                                                textAlign = TextAlign.Center,
-                                                color = Color.Black,
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                        )
-                                    }
-                                }
-                            }
-                            else{
-                                Box(modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(24.dp),
-                                )
-                            }
+                            HelperBox(hide = hide, helperText = t)
                         }
-
                     }
                 }
-
             }
         }
-        }
+    }
+}
 
+@Composable
+fun HelperBox(
+    hide: Boolean,
+    helperText: String
+) {
+    if (!hide) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .border(1.dp, Color.White, RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.White)
+                    .padding(horizontal = 2.dp)
+                    .fillMaxWidth()
+                    .height(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = helperText,
+                    fontSize = 9.sp,
+                    fontStyle = FontStyle.Italic,
+                    style = TextStyle(
+                        textIndent = TextIndent(0.sp),
+                        textAlign = TextAlign.Center,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(24.dp),
+        )
+    }
+}
+
+@Composable
+fun StarGadget(
+    url: String,
+    clicked: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ImageAsync2(string = url, modifier = Modifier
+            .size(40.dp)
+            .clickable {
+                onClick()
+            })
+        Spacer(modifier = Modifier.height(2.dp))
+        if (clicked) Image(
+            painter = painterResource(id = R.drawable.arrow),
+            contentDescription = null,
+            modifier = Modifier.height(12.dp)
+        )
+    }
+}
+
+@Composable
+fun BarPreview(
+    moveName: String,
+    previewText: String,
+    previewIcon: Int,
+    previewColor: Color,
+    clicked: Boolean,
+    onClick: () -> Unit
+) {
+    Box {
+        Box(
+            modifier = Modifier.height(35.dp),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(25.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topEnd = 4.dp,
+                            bottomEnd = 4.dp
+                        )
+                    )
+                    .background(Color(0xff262626))
+                    .clickable {
+                        onClick()
+                    }
+            )
+        }
+        Column(
+            modifier = Modifier
+                .height(35.dp)
+                .padding(start = 43.dp),
+        ) {
+            Text(
+                previewText,
+                fontSize = 12.sp,
+                color = previewColor,
+                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f)
+                )
+            )
+            Text(
+                moveName.uppercase(),
+                fontSize = 14.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.offset(y = (-4).dp)
+            )
+        }
+        Image(
+            painter = painterResource(id = previewIcon),
+            contentDescription = null,
+            modifier = Modifier
+                .size(35.dp)
+                .background(Color.Transparent)
+        )
+        if (clicked) {
+            Image(
+                painter = painterResource(id = R.drawable.atacksuperborder),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(35.dp)
+                    .background(Color.Transparent)
+            )
+
+        }
+    }
+}
+
+@Composable
+fun CounterColumn(url: String, name: String, placeholder: Int, isExp: Boolean) {
+    Column {
+        ImageAsync(url, placeholder, Modifier.size(42.dp))
+        if (isExp) Text(
+            text = name,
+            fontSize = 8.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(43.dp),
+            color = Color.White,
+            fontStyle = FontStyle.Italic
+        )
+    }
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun ImageAsync(url:String, placeholder : Int,size:Dp) {
+fun ImageAsync(url: String, placeholder: Int, modifier: Modifier = Modifier) {
     GlideImage(
         model = url,
         contentDescription = null,
-        modifier = Modifier
-            .size(size)
+        modifier = modifier
             .aspectRatio(1f)
             .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp)),
-    ){
-        it.placeholder(placeholder).fitCenter()
-    }
-}
-@OptIn(ExperimentalGlideComposeApi::class)
-@Composable
-fun ImageAsync1(url:String, placeholder : Int) {
-    GlideImage(
-        model = url,
-        contentDescription = null,
-        modifier = Modifier
-            .size(42.dp)
-            .border(width = 2.dp, color = Color.Black, shape = RoundedCornerShape(12.dp))
-            .clip(RoundedCornerShape(12.dp)),
-    ){
+    ) {
         it.placeholder(placeholder).fitCenter()
     }
 }

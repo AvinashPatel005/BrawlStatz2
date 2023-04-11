@@ -41,7 +41,7 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.kal.brawlstatz2.data.BottomNavItem
 import com.kal.brawlstatz2.presentation.ShimmerListItem
-import com.kal.brawlstatz2.presentation.ShowBrawlersList
+import com.kal.brawlstatz2.presentation.BrawlersList
 import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
@@ -217,7 +217,7 @@ class MainActivity : ComponentActivity() {
     fun Navigation(navController: NavHostController) {
         val viewModel = viewModel<MainViewModel>()
         val brawlers = viewModel.blist.value
-        val Meta = viewModel.mlist.value
+        val meta = viewModel.nestedList.value
         val isLoading = viewModel.isLoading.value
         val isSearching = viewModel.isSearching.value
         AnimatedNavHost(navController = navController, startDestination = "brawler" ){
@@ -239,9 +239,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+                BrawlersList(brawler = brawlers,isSearching)
 
-                ShowBrawlersList(brawler = brawlers,isSearching)
-                
             }
             composable("map",
                 enterTransition = {
@@ -255,7 +254,7 @@ class MainActivity : ComponentActivity() {
                     fadeIn(animationSpec = tween(300))
                 }
             ){
-                ShowMetaList(brawler = Meta)
+                ShowMetaList(meta,viewModel.sortedMetaList)
             }
         }
     }
