@@ -13,13 +13,14 @@ import com.kal.brawlstatz2.ui.theme.*
 
 class MainViewModel : ViewModel() {
     val list :ArrayList<Brawler> = ArrayList()
-    val blist: MutableState<List<Brawler>> = mutableStateOf(listOf())
-    val isLoading : MutableState<Boolean> = mutableStateOf(true)
-    var size : Int=0
-    var isSearching : MutableState<Boolean> = mutableStateOf(false)
     var sortedMetaList:ArrayList<Brawler> = ArrayList()
-    val mlist :ArrayList<MetaTier> = ArrayList()
+
+    val blist: MutableState<List<Brawler>> = mutableStateOf(listOf())
     var nestedList: MutableState<List<MetaTier>> = mutableStateOf(listOf())
+
+    val isLoading : MutableState<Boolean> = mutableStateOf(true)
+    var isSearching : MutableState<Boolean> = mutableStateOf(false)
+    var size : Int=0
     init {
         fetchData()
     }
@@ -33,32 +34,31 @@ class MainViewModel : ViewModel() {
         blist.value=sortedlist
     }
     private fun metaSorting(){
+        val mlist :ArrayList<MetaTier> = ArrayList()
         sortedMetaList.addAll(list.sortedBy { it.tier })
+        val sTier: ArrayList<Brawler> = ArrayList()
+        val aTier: ArrayList<Brawler> = ArrayList()
+        val bTier: ArrayList<Brawler> = ArrayList()
+        val cTier: ArrayList<Brawler> = ArrayList()
+        val dTier: ArrayList<Brawler> = ArrayList()
+        val fTier: ArrayList<Brawler> = ArrayList()
 
-        var Stier: ArrayList<Brawler> = ArrayList()
-        var Atier: ArrayList<Brawler> = ArrayList()
-        var Btier: ArrayList<Brawler> = ArrayList()
-        var Ctier: ArrayList<Brawler> = ArrayList()
-        var Dtier: ArrayList<Brawler> = ArrayList()
-        var Ftier: ArrayList<Brawler> = ArrayList()
-
-        for(brawl in sortedMetaList){
-            when(brawl.tier?.get(0)){
-                in '0'..'9' -> Stier.add(brawl)
-                'A' -> Atier.add(brawl)
-                'B' -> Btier.add(brawl)
-                'C' -> Ctier.add(brawl)
-                'D' -> Dtier.add(brawl)
-                'F' -> Ftier.add(brawl)
+        for(brawler in sortedMetaList){
+            when(brawler.tier?.get(0)){
+                in '0'..'9' -> sTier.add(brawler)
+                'A' -> aTier.add(brawler)
+                'B' -> bTier.add(brawler)
+                'C' -> cTier.add(brawler)
+                'D' -> dTier.add(brawler)
+                'F' -> fTier.add(brawler)
             }
         }
-        mlist.add(MetaTier("S",Stier, Color(0xFFff7e7e)))
-        mlist.add(MetaTier("A",Atier, Color(0xFFffbf7f)))
-        mlist.add(MetaTier("B",Btier, Color(0xFFffde7f)))
-        mlist.add(MetaTier("C",Ctier, Color(0xFFfeff7f)))
-        mlist.add(MetaTier("D",Dtier, Color(0xFFbeff7d)))
-        mlist.add(MetaTier("E",Ftier, Color(0xFF7eff80)))
-
+        mlist.add(MetaTier("S",sTier, Color(0xFFff7e7e)))
+        mlist.add(MetaTier("A",aTier, Color(0xFFffbf7f)))
+        mlist.add(MetaTier("B",bTier, Color(0xFFffde7f)))
+        mlist.add(MetaTier("C",cTier, Color(0xFFfeff7f)))
+        mlist.add(MetaTier("D",dTier, Color(0xFFbeff7d)))
+        mlist.add(MetaTier("E",fTier, Color(0xFF7eff80)))
         nestedList.value=mlist
     }
     private fun fetchData(){

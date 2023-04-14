@@ -63,7 +63,7 @@ fun BrawlerCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 6.dp, end = 6.dp, top = 4.dp)
+            .padding(start = 6.dp, end = 6.dp, top = 3.dp)
             .border(width = 2.dp, color = brawler.color, shape = RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(12.dp)),
         elevation = CardDefaults.cardElevation(10.dp),
@@ -93,7 +93,7 @@ fun BrawlerCard(
                         ImageAsync(
                             url = brawler.bpro.toString(),
                             placeholder = R.drawable.placeholder1,
-                            modifier = Modifier.size(if (isExp) 110.dp else 86.dp)
+                            modifier = Modifier.size(if (isExp) 110.dp else 84.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Column {

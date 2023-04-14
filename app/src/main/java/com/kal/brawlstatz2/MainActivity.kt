@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -45,6 +46,7 @@ import com.kal.brawlstatz2.presentation.BrawlersList
 import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -83,7 +85,9 @@ class MainActivity : ComponentActivity() {
                 }
                     LaunchedEffect(key1 = isVisible, key2 = isSearch){
                         if(isVisible&&isSearch){
+                            delay(50)
                             focusManager.clearFocus()
+
                             focusRequester.requestFocus()
                         }
                         if(!isSearch){
@@ -123,7 +127,10 @@ class MainActivity : ComponentActivity() {
                                                  Row(
                                                      verticalAlignment = Alignment.CenterVertically
                                                  ){
-                                                     if (isSearch && isSearchVisible) {
+
+                                                     AnimatedVisibility(visible = (isSearch && isSearchVisible) , enter = fadeIn(),
+                                                        exit = fadeOut()) {
+
                                                          isVisible = !isVisible
                                                          OutlinedTextField(
                                                              value = value,
@@ -223,8 +230,10 @@ class MainActivity : ComponentActivity() {
         AnimatedNavHost(navController = navController, startDestination = "brawler" ){
             composable("brawler",
                 enterTransition = {
-                    fadeIn(animationSpec = tween(300))
-
+                        slideInHorizontally(
+                            initialOffsetX = { -800 },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
                 }
                 ){
                 if(isLoading){
@@ -244,14 +253,28 @@ class MainActivity : ComponentActivity() {
             }
             composable("map",
                 enterTransition = {
-                    fadeIn(animationSpec = tween(300))
+                    if(navController.previousBackStackEntry?.destination?.route=="meta"){
+                        slideInHorizontally(
+                            initialOffsetX = { -800 },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
+                    }
+                    else {
+                        slideInHorizontally(
+                            initialOffsetX = { 800 },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300))
+                    }
                 }
                 ){
                 SetDataMap()
             }
             composable("meta",
                 enterTransition = {
-                    fadeIn(animationSpec = tween(300))
+                    slideInHorizontally(
+                        initialOffsetX = { 800 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
                 }
             ){
                 ShowMetaList(meta,viewModel.sortedMetaList)
@@ -278,7 +301,7 @@ fun BottomNavBar(
            NavigationBarItem(
                selected = selected,
                modifier = Modifier.height(45.dp),
-               onClick = { onItemClicked(it) },
+               onClick = { if(!selected) onItemClicked(it) },
                icon = {
                    Column(
                        horizontalAlignment = CenterHorizontally
@@ -291,18 +314,8 @@ fun BottomNavBar(
        }
     }
 }
-
-
-@Composable
-fun SetDataBrawler() {
-    Text(text = "Brawler Coming soon")
-}
-@Composable
-fun SetDataMeta() {
-    Text(text = "META Coming soon")
-}
 @Composable
 fun SetDataMap() {
-    Text(text = "MAP Coming soon")
+    Text(text = "MAP Coming soon", modifier = Modifier.fillMaxSize())
 
 }

@@ -29,7 +29,6 @@ import com.kal.brawlstatz2.data.MetaTier
 @Composable
 fun ShowMetaList(nestedList: List<MetaTier> , sortedMetaList : ArrayList<Brawler>) {
 
-
     LazyColumn() {
         item {
             Spacer(modifier = Modifier.height(4.dp))
@@ -115,85 +114,88 @@ fun MetaCard(
                     .padding(start = 2.dp, end = 2.dp)
                     .height(cardHeight),
                 color = Color(0xFF111010)
-            ){
-                Box(
+            ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(cardHeight)
+            ) {
+
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(cardHeight)
-                ){
-
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Row(
-                        modifier= Modifier
-                            .fillMaxWidth()
-                            .height(cardHeight)
-                            .padding(4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Row(
-                        ) {
-                            brawler.bpro?.let { ImageAsync(url = it,placeholder = R.drawable.placeholder1, modifier = Modifier.size(86.dp)) }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Column {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                brawler.bname?.let {
-                                    Text(
-                                        text = it,
-                                        fontSize = 19.sp,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        style = TextStyle(
-                                            shadow = Shadow(offset = Offset(1f,1f), blurRadius = 1f),
-                                        )
-                                    )
-                                }
-                                brawler.brare?.let {
-                                    Text(
-                                        text = it,
-                                        fontSize = 10.sp,
-                                        fontStyle = FontStyle.Italic,
-                                        color = brawler.color,
-                                        fontFamily = FontFamily.Serif,
-                                        fontWeight = FontWeight.Bold,
-                                        style = TextStyle(
-                                            shadow = Shadow(offset = Offset(1f,1f), blurRadius = 1f)
-                                        )
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    modifier = Modifier,
-                                ) {
-                                    Image(painter = painterResource(id = if(brawler.bstarpower.equals("1")) R.drawable.s1 else if(brawler.bstarpower.equals("2")) R.drawable.s2 else R.drawable.sd), contentDescription = null,modifier = Modifier
-                                        .size(20.dp),
-                                    )
-                                    Spacer(modifier = Modifier.width(2.dp))
-                                    Image(painter = painterResource(id = if(brawler.bgadget.equals("1")) R.drawable.g1 else if(brawler.bgadget.equals("2")) R.drawable.g2 else R.drawable.gd), contentDescription = null,modifier = Modifier
-                                        .size(20.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    brawler.bgear1?.let { ImageAsync2(it) }
-                                    brawler.bgear2?.let { ImageAsync2(it) }
-                                    brawler.bgear3?.let { ImageAsync2(it) }
-                                }
-                            }
-
+                    ) {
+                        brawler.bpro?.let {
+                            ImageAsync(
+                                url = it,
+                                placeholder = R.drawable.placeholder1,
+                                modifier = Modifier.size(80.dp)
+                            )
                         }
-                        Text(
-                            text = "# "+(i + 1).toString(),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            style = TextStyle(
-                                shadow = Shadow(offset = Offset(4f,1f), blurRadius = 1f)
-                            ),
-                            modifier = Modifier.padding(end = 10.dp)
-                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Column {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            brawler.bname?.let {
+                                Text(
+                                    text = it,
+                                    fontSize = 19.sp,
+                                    color = brawler.color,
+                                    fontWeight = FontWeight.Bold,
+                                    style = TextStyle(
+                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f),
+                                    )
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Row(
+                                modifier = Modifier,
+                            ) {
+                                Image(
+                                    painter = painterResource(
+                                        id = if (brawler.bstarpower.equals("1")) R.drawable.s1 else if (brawler.bstarpower.equals("2")
+                                        ) R.drawable.s2 else R.drawable.sd
+                                    ), contentDescription = null,
+                                    modifier = Modifier
+                                        .size(20.dp),
+                                )
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Image(
+                                    painter = painterResource(
+                                        id = if (brawler.bgadget.equals("1")) R.drawable.g1 else if (brawler.bgadget.equals(
+                                                "2"
+                                            )
+                                        ) R.drawable.g2 else R.drawable.gd
+                                    ), contentDescription = null, modifier = Modifier
+                                        .size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                brawler.bgear1?.let { ImageAsync2(it) }
+                                brawler.bgear2?.let { ImageAsync2(it) }
+                                brawler.bgear3?.let { ImageAsync2(it) }
+                            }
+                        }
+
                     }
+                    Text(
+                        text = "#" + (i + 1).toString(),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        style = TextStyle(
+                            shadow = Shadow(offset = Offset(4f, 1f), blurRadius = 1f)
+                        ),
+                        modifier = Modifier.padding(end = 10.dp)
+                    )
                 }
             }
-
+        }
     }
-
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
