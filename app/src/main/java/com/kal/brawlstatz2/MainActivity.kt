@@ -6,11 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -27,10 +28,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -47,6 +51,7 @@ import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
+import org.w3c.dom.Text
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -67,19 +72,25 @@ class MainActivity : ComponentActivity() {
                     var value by remember {
                         mutableStateOf("")
                     }
-                    var isSearchVisible by remember{
-                        mutableStateOf(true)
+                    var tabCurrent by remember{
+                        mutableStateOf("brawler")
                     }
-                var showMenu by remember { mutableStateOf(false) }
+                var selectedSort by remember {
+                    mutableStateOf(0)
+                }
+                var selectedSortMeta by remember {
+                    mutableStateOf(0)
+                }
+
                     val focusManager = LocalFocusManager.current
                     val navController = rememberAnimatedNavController()
                 navController.enableOnBackPressed(enabled = false)
                 val activity = (LocalContext.current as? Activity)
-                BackHandler() {
+                BackHandler {
                     if(navController.currentDestination?.route  == "brawler") activity?.finish()
                     else {
                         navController.navigate("brawler")
-                        isSearchVisible=true
+                        tabCurrent="brawler"
                         isSearch=false
                     }
                 }
@@ -97,7 +108,7 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         topBar = {
-                                 Column() {
+                                 Column{
 
                                      TopAppBar(
                                          title = {
@@ -128,7 +139,7 @@ class MainActivity : ComponentActivity() {
                                                      verticalAlignment = Alignment.CenterVertically
                                                  ){
 
-                                                     AnimatedVisibility(visible = (isSearch && isSearchVisible) , enter = fadeIn(),
+                                                     AnimatedVisibility(visible = (isSearch && tabCurrent=="brawler") , enter = fadeIn(),
                                                         exit = fadeOut()) {
 
                                                          isVisible = !isVisible
@@ -158,7 +169,7 @@ class MainActivity : ComponentActivity() {
                                                      Card(
                                                          modifier = Modifier.clip(RoundedCornerShape(100))
                                                      ) {
-                                                     if(isSearchVisible) {
+                                                     if(tabCurrent=="brawler") {
                                                          IconButton(onClick = {
                                                              if (value == "") {
                                                                  isSearch = !isSearch
@@ -182,25 +193,111 @@ class MainActivity : ComponentActivity() {
                                              }
                                          }
                                      )
-                                     BottomNavBar(
-                                         items = listOf(
-                                             BottomNavItem("BRAWLER","brawler", Icons.Default.Home),
-                                             BottomNavItem("MAP","map", Icons.Default.Notifications),
-                                             BottomNavItem("META","meta", Icons.Default.Settings)
 
-                                         ),
-                                         navController = navController,
-                                         onItemClicked = {
-                                             isSearchVisible=it.route=="brawler"
-                                             isSearch=false
-                                             value = ""
-                                             viewModel.isSearching.value=false
-                                             viewModel.find(value.lowercase())
-                                             navController.navigate(it.route)
+                                     if(tabCurrent=="brawler"){
+                                         LazyRow(
+                                             modifier = Modifier
+                                                 .background(Color(0xFF000000))
+                                                 .height(40.dp)
+                                         ) {
+                                             val list  = listOf("All","Chromatic","Legendary","Mythic","Epic","Super Rare","Rare","Starting")
+                                             items(list){s ->
+                                                 Spacer(modifier = Modifier.width(10.dp))
+                                                 Button(
+                                                     modifier = Modifier.height(35.dp),
+                                                     onClick = {
+
+                                                         if(selectedSort==list.indexOf(s)&&selectedSort!=0){
+                                                             selectedSort=0
+                                                             viewModel.find("")
+                                                         }
+                                                         else{
+                                                             selectedSort = list.indexOf(s)
+                                                             if(s=="All") viewModel.find("")
+                                                             else  viewModel.find(s.lowercase())
+                                                         }
+                                                     },
+                                                     colors = if(selectedSort==list.indexOf(s)) ButtonDefaults.buttonColors(Color(0xffeeeee4)) else ButtonDefaults.buttonColors(Color(0xFF202124)),
+                                                     shape = RoundedCornerShape(8.dp),
+                                                     contentPadding = PaddingValues(8.dp)
+                                                 ) {
+                                                     Text(text = s, color = if(selectedSort!=list.indexOf(s)) Color(0xffeeeee4) else Color(0xFF202124))
+                                                 }
+                                             }
+                                             item{
+                                                 Spacer(modifier = Modifier.width(10.dp))
+                                             }
                                          }
-                                     )
+                                     }
+                                     else if(tabCurrent=="meta"){
+                                         LazyRow(
+                                             modifier = Modifier
+                                                 .background(Color(0xFF000000))
+                                                 .height(40.dp)
+                                         ) {
+                                             val list  = listOf("All","S","A","B","C","D","F")
+                                             items(list){s ->
+                                                 Spacer(modifier = Modifier.width(10.dp))
+                                                 Button(
+                                                     modifier = Modifier.height(35.dp),
+                                                     onClick = {
+                                                         if(selectedSortMeta==list.indexOf(s)&&selectedSortMeta!=0){
+                                                             selectedSortMeta=0
+                                                             viewModel.metaSorting()
+                                                         }
+                                                         else{
+                                                             selectedSortMeta=list.indexOf(s)
+                                                             if(s!="All") {
+                                                                 viewModel.metaFind(s[0])
+                                                             }
+                                                             else viewModel.metaSorting()
+                                                         }
+                                                     },
+                                                     colors = if(selectedSortMeta==list.indexOf(s)) ButtonDefaults.buttonColors(Color(0xffeeeee4)) else ButtonDefaults.buttonColors(Color(0xFF202124)),
+                                                     shape = RoundedCornerShape(8.dp),
+                                                     contentPadding = PaddingValues(8.dp)
+                                                 ) {
+                                                     Text(text = buildAnnotatedString
+                                                     {
+                                                         append(s)
+                                                         if(s!="All"){
+                                                             withStyle(style = SpanStyle(
+                                                                 fontSize = 7.sp,
+                                                                 color = Color.Gray
+                                                             )){
+                                                                 append("TIER")
+                                                             }
+                                                         }
+                                                     }, color = if(selectedSortMeta!=list.indexOf(s)) Color(0xffeeeee4) else Color(0xFF202124))
+                                                 }
+                                             }
+                                             item{
+                                                 Spacer(modifier = Modifier.width(10.dp))
+                                             }
+                                         }
+                                     }
                                  }
                         },
+                        bottomBar = {
+                            BottomNavBar(
+                                items = listOf(
+                                    BottomNavItem("BRAWLER","brawler", Icons.Default.Home),
+                                    BottomNavItem("MAP","map", Icons.Default.Notifications),
+                                    BottomNavItem("META","meta", Icons.Default.Settings)
+                                ),
+                                navController = navController,
+                                onItemClicked = {
+                                    tabCurrent=it.route
+                                    selectedSort=0
+                                    selectedSortMeta=0
+                                    isSearch=false
+                                    value = ""
+                                    viewModel.isSearching.value=false
+                                    viewModel.find(value.lowercase())
+                                    navController.navigate(it.route)
+                                }
+                            )
+                        }
                     ) {
                         Box(
                             modifier = Modifier
@@ -213,7 +310,6 @@ class MainActivity : ComponentActivity() {
                             Navigation(navController = navController)
                             Divider()
                         }
-
                     }
                 }
             }
@@ -249,7 +345,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 BrawlersList(brawler = brawlers,isSearching)
-
             }
             composable("map",
                 enterTransition = {
@@ -287,30 +382,32 @@ class MainActivity : ComponentActivity() {
 fun BottomNavBar(
     items:List<BottomNavItem>,
     navController: NavController,
-    modifier: Modifier = Modifier,
     onItemClicked : (BottomNavItem) -> Unit
 ) {
     val backStackEntry = navController.currentBackStackEntryAsState()
     NavigationBar(
-        modifier = modifier.height(50.dp),
+        modifier = Modifier.height(45.dp),
         tonalElevation = 0.dp,
-        containerColor = Color(0xFF000000),
     ){
-       items.forEach{
-           val selected = it.route == backStackEntry.value?.destination?.route
-           NavigationBarItem(
-               selected = selected,
-               modifier = Modifier.height(45.dp),
-               onClick = { if(!selected) onItemClicked(it) },
-               icon = {
-                   Column(
-                       horizontalAlignment = CenterHorizontally
-                   ) {
-                       Icon(imageVector = it.icon, contentDescription = it.name )
-                       if(selected) Text(text = it.name, textAlign = TextAlign.Center, fontSize = 9.sp)
-                   }
+       Column {
+           Divider()
+           Row{
+               items.forEach{
+                   val selected = it.route == backStackEntry.value?.destination?.route
+                   NavigationBarItem(
+                       selected = selected,
+                       onClick = { if(!selected) onItemClicked(it) },
+                       icon = {
+                           Column(
+                               horizontalAlignment = CenterHorizontally
+                           ) {
+                               Icon(imageVector = it.icon, contentDescription = it.name, modifier = Modifier.size(20.dp))
+                               if(selected) Text(text = it.name, textAlign = TextAlign.Center, fontSize = 8.sp)
+                           }
+                       }
+                   )
                }
-           )
+           }
        }
     }
 }

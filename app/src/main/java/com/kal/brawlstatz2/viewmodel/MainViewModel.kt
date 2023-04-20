@@ -33,8 +33,9 @@ class MainViewModel : ViewModel() {
         }
         blist.value=sortedlist
     }
-    private fun metaSorting(){
+     fun metaSorting(){
         val mlist :ArrayList<MetaTier> = ArrayList()
+         sortedMetaList.clear()
         sortedMetaList.addAll(list.sortedBy { it.tier })
         val sTier: ArrayList<Brawler> = ArrayList()
         val aTier: ArrayList<Brawler> = ArrayList()
@@ -58,8 +59,37 @@ class MainViewModel : ViewModel() {
         mlist.add(MetaTier("B",bTier, Color(0xFFffde7f)))
         mlist.add(MetaTier("C",cTier, Color(0xFFfeff7f)))
         mlist.add(MetaTier("D",dTier, Color(0xFFbeff7d)))
-        mlist.add(MetaTier("E",fTier, Color(0xFF7eff80)))
+        mlist.add(MetaTier("F",fTier, Color(0xFF7eff80)))
         nestedList.value=mlist
+    }
+
+    fun metaFind(txt: Char){
+        val find :ArrayList<MetaTier> = ArrayList()
+        val findTier: ArrayList<Brawler> = ArrayList()
+        if(txt=='S') {
+            for(brawler in sortedMetaList){
+                when(brawler.tier?.get(0)){
+                    in '0'..'9' -> findTier.add(brawler)
+                }
+            }
+        }
+        else{
+            for(brawler in sortedMetaList){
+                if(brawler.tier?.get(0)==txt){
+                    findTier.add(brawler)
+                }
+            }
+        }
+        find.add(MetaTier(txt.toString(),findTier, when(txt){
+            'S'-> Color(0xFFff7e7e)
+            'A'-> Color(0xFFffbf7f)
+            'B'-> Color(0xFFffde7f)
+            'C'-> Color(0xFFfeff7f)
+            'D'-> Color(0xFFbeff7d)
+            'F'-> Color(0xFF7eff80)
+            else-> Color.Black
+        }))
+        nestedList.value=find
     }
     private fun fetchData(){
         FirebaseDatabase.getInstance().getReference("brawlers")
