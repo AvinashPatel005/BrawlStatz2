@@ -1,5 +1,7 @@
 package com.kal.brawlstatz2.presentation
 
+import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -33,9 +36,10 @@ import com.kal.brawlstatz2.R
 import com.kal.brawlstatz2.data.Brawler
 import com.kal.brawlstatz2.data.ExpandableCardModel
 import com.kal.brawlstatz2.viewmodel.CardsViewModel
+import com.kal.brawlstatz2.viewmodel.MainViewModel
 
 @Composable
-fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean) {
+fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainViewModel) {
     val cardModel = viewModel<CardsViewModel>()
     if (isSearching && brawler.isNotEmpty()) cardModel.c1list.value =
         ExpandableCardModel(brawler[0].bname, true)
@@ -44,7 +48,7 @@ fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean) {
         modifier = Modifier.fillMaxSize()
     ) {
         items(brawler) {
-            BrawlerCard(brawler = it, cardModel)
+            BrawlerCard(brawler = it, cardModel,viewModel)
         }
     }
 }
@@ -53,7 +57,8 @@ fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean) {
 @Composable
 fun BrawlerCard(
     brawler: Brawler,
-    cardModel: CardsViewModel
+    cardModel: CardsViewModel,
+    viewModel: MainViewModel
 ) {
     val cardId = brawler.bname
     val cardHeight: Dp = 92.dp
@@ -118,6 +123,16 @@ fun BrawlerCard(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f)
                                 )
                             )
+                            val activity = (LocalContext.current as? Activity)
+                            if(brawler.trait!="null") {
+                                ImageAsync2(string = brawler.trait.toString(), modifier = Modifier
+                                    .clickable {
+                                        for (ts in viewModel.traits) {
+                                            if (brawler.trait!!.contains(ts.tName)) Toast.makeText(activity,ts.tDis,Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                     Row(

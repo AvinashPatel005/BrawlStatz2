@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -51,7 +52,6 @@ import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
-import org.w3c.dom.Text
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -200,13 +200,19 @@ class MainActivity : ComponentActivity() {
                                                  .background(Color(0xFF000000))
                                                  .height(40.dp)
                                          ) {
-                                             val list  = listOf("All","Chromatic","Legendary","Mythic","Epic","Super Rare","Rare","Starting")
+                                             val list  = listOf("All","Traits","Chromatic","Legendary","Mythic","Epic","Super Rare","Rare","Starting")
                                              items(list){s ->
                                                  Spacer(modifier = Modifier.width(10.dp))
                                                  Button(
-                                                     modifier = Modifier.height(35.dp),
+                                                     modifier =if(s=="Traits") {
+                                                         Modifier.border( width = 2.dp,
+                                                             color = Color.Gray,
+                                                             shape = RoundedCornerShape(8.dp)).height(35.dp)
+                                                                    }
+                                                     else {
+                                                         Modifier.height(35.dp)
+                                                          },
                                                      onClick = {
-
                                                          if(selectedSort==list.indexOf(s)&&selectedSort!=0){
                                                              selectedSort=0
                                                              viewModel.find("")
@@ -344,7 +350,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                BrawlersList(brawler = brawlers,isSearching)
+                BrawlersList(brawler = brawlers,isSearching,viewModel)
             }
             composable("map",
                 enterTransition = {

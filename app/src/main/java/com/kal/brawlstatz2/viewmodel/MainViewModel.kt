@@ -9,12 +9,13 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.kal.brawlstatz2.data.Brawler
 import com.kal.brawlstatz2.data.MetaTier
+import com.kal.brawlstatz2.data.Trait
 import com.kal.brawlstatz2.ui.theme.*
 
 class MainViewModel : ViewModel() {
     val list :ArrayList<Brawler> = ArrayList()
     var sortedMetaList:ArrayList<Brawler> = ArrayList()
-
+    var traits : ArrayList<Trait> = ArrayList();
     val blist: MutableState<List<Brawler>> = mutableStateOf(listOf())
     var nestedList: MutableState<List<MetaTier>> = mutableStateOf(listOf())
 
@@ -26,11 +27,21 @@ class MainViewModel : ViewModel() {
     }
     fun find(txt:String){
         val sortedlist :ArrayList<Brawler> = ArrayList()
-        for(brawler in list){
-            if(brawler.bname?.lowercase()?.startsWith(txt) == true||brawler.brare?.lowercase()?.startsWith(txt) == true){
-               sortedlist.add(brawler)
+        if(txt=="traits"){
+            for(brawler in list){
+                if(brawler.trait!="null"){
+                    sortedlist.add(brawler)
+                }
             }
         }
+        else{
+            for(brawler in list){
+                if(brawler.bname?.lowercase()?.startsWith(txt) == true||brawler.brare?.lowercase()?.startsWith(txt) == true){
+                    sortedlist.add(brawler)
+                }
+            }
+        }
+
         blist.value=sortedlist
     }
      fun metaSorting(){
@@ -92,6 +103,20 @@ class MainViewModel : ViewModel() {
         nestedList.value=find
     }
     private fun fetchData(){
+        FirebaseDatabase.getInstance().getReference("traits").addValueEventListener(object:ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                traits.clear()
+                for(snap in snapshot.children ){
+                    val tempTrait = Trait(snap.key.toString(),snap.value.toString())
+                    traits.add(tempTrait)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
         FirebaseDatabase.getInstance().getReference("brawlers")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -148,5 +173,6 @@ class MainViewModel : ViewModel() {
                 }
 
             })
+
     }
 }
