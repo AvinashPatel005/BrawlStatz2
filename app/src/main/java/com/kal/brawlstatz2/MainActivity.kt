@@ -9,9 +9,13 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,6 +23,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,8 +51,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.kal.brawlstatz2.data.BottomNavItem
+import com.kal.brawlstatz2.data.Events
+import com.kal.brawlstatz2.data.events.Active
 import com.kal.brawlstatz2.presentation.ShimmerListItem
 import com.kal.brawlstatz2.presentation.BrawlersList
+import com.kal.brawlstatz2.presentation.MapCard
 import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
@@ -368,7 +376,9 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 ){
-                SetDataMap()
+                SetDataMap(){
+
+                }
             }
             composable("meta",
                 enterTransition = {
@@ -418,7 +428,42 @@ fun BottomNavBar(
     }
 }
 @Composable
-fun SetDataMap() {
-    Text(text = "MAP Coming soon", modifier = Modifier.fillMaxSize())
-
+fun SetDataMap(
+    onclick : (String) -> Unit
+) {
+    val eventCardList = listOf<Events>(
+        Events("CURRENT","curr", Color.Green,true),
+        Events("UPCOMING","up", Color.Blue,true),
+        Events("POWER LEAGUE","pow", Color.Cyan,false),
+        Events("SEASON","season", Color.Red,false),
+        Events("CLUB","club", Color.Yellow,false),
+    )
+    LazyVerticalGrid(columns = GridCells.Fixed(2),Modifier.padding(top = 2.dp, start = 4.dp,end=4.dp)){
+        items(eventCardList){
+            Card(
+                Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clickable {
+                        if(it.enabled) onclick(it.route)
+                    },
+                colors = CardDefaults.cardColors(it.color)
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center){
+                    Text(text = it.cardName)
+                }
+            }
+        }
+    }
+}
+@Composable
+fun Curr(value: List<Active>) {
+    LazyColumn(
+        Modifier.fillMaxSize()
+    ){
+        items(value){
+            MapCard(active = it)
+        }
+    }
 }

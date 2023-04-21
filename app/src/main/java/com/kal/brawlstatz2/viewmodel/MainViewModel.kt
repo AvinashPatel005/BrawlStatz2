@@ -10,7 +10,13 @@ import com.google.firebase.database.ValueEventListener
 import com.kal.brawlstatz2.data.Brawler
 import com.kal.brawlstatz2.data.MetaTier
 import com.kal.brawlstatz2.data.Trait
+import com.kal.brawlstatz2.data.events.Active
+import com.kal.brawlstatz2.data.events.event
+import com.kal.brawlstatz2.retrofit.RetrofitInstance
 import com.kal.brawlstatz2.ui.theme.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainViewModel : ViewModel() {
     val list :ArrayList<Brawler> = ArrayList()
@@ -22,8 +28,41 @@ class MainViewModel : ViewModel() {
     val isLoading : MutableState<Boolean> = mutableStateOf(true)
     var isSearching : MutableState<Boolean> = mutableStateOf(false)
     var size : Int=0
+
+
+    val _activeList :ArrayList<Active> = ArrayList()
+    val activeList: MutableState<List<Active>> = mutableStateOf(listOf())
+
+    val _upcomingList :ArrayList<Active> = ArrayList()
+    val upcomingList: MutableState<List<Active>> = mutableStateOf(listOf())
+
+
     init {
         fetchData()
+        getData()
+    }
+
+
+    private fun getData(){
+        RetrofitInstance.apiInterface.getData().enqueue(object : Callback<event?> {
+            override fun onResponse(call: Call<event?>, response: Response<event?>) {
+                response.body()?.active?.filter { it.slot.name.contains("Daily") }?.let { _activeList.addAll(it) }
+                response.body()?.active?.filter { it.slot.name.contains("Weekly") }?.let { _activeList.addAll(it) }
+                _activeList.removeAll(_activeList.filter { it.map.hash.contains("-Duo") }.toSet())
+
+
+                response.body()?.upcoming?.filter { it.slot.name.contains("Daily") }?.let { _upcomingList.addAll(it) }
+                response.body()?.upcoming?.filter { it.slot.name.contains("Weekly") }?.let { _upcomingList.addAll(it) }
+                _upcomingList.removeAll(_upcomingList.filter { it.map.hash.contains("-Duo") }.toSet())
+
+                activeList.value=_activeList
+                upcomingList.value=_upcomingList
+            }
+
+            override fun onFailure(call: Call<event?>, t: Throwable) {
+
+            }
+        })
     }
     fun find(txt:String){
         val sortedlist :ArrayList<Brawler> = ArrayList()
