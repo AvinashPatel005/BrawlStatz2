@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
 import com.google.accompanist.navigation.animation.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -376,9 +377,17 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 ){
-                SetDataMap(){
 
+                NavHost(navController = navController, startDestination = "menu") {
+                    composable("menu") { SetDataMap(){route->
+                        navController.navigate(route = route)
+                    } }
+                    composable("curr") {Curr(viewModel.activeList.value)}
+                    composable("up") { Curr(viewModel.upcomingList.value) }
                 }
+
+
+
             }
             composable("meta",
                 enterTransition = {
