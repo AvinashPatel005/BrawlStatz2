@@ -113,7 +113,6 @@ class MainActivity : ComponentActivity() {
                             focusManager.clearFocus()
                         }
                     }
-
                     Scaffold(
                         topBar = {
                                  Column{
