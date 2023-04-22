@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import com.google.accompanist.navigation.animation.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -214,9 +213,13 @@ class MainActivity : ComponentActivity() {
                                                  Spacer(modifier = Modifier.width(10.dp))
                                                  Button(
                                                      modifier =if(s=="Traits") {
-                                                         Modifier.border( width = 2.dp,
-                                                             color = Color.Gray,
-                                                             shape = RoundedCornerShape(8.dp)).height(35.dp)
+                                                         Modifier
+                                                             .border(
+                                                                 width = 2.dp,
+                                                                 color = Color.Gray,
+                                                                 shape = RoundedCornerShape(8.dp)
+                                                             )
+                                                             .height(35.dp)
                                                                     }
                                                      else {
                                                          Modifier.height(35.dp)
@@ -377,10 +380,10 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 ){
-
-                NavHost(navController = navController, startDestination = "menu") {
+                val navController1 = rememberAnimatedNavController()
+                AnimatedNavHost(navController = navController1, startDestination = "menu") {
                     composable("menu") { SetDataMap(){route->
-                        navController.navigate(route = route)
+                        navController1.navigate(route = route)
                     } }
                     composable("curr") {Curr(viewModel.activeList.value)}
                     composable("up") { Curr(viewModel.upcomingList.value) }
@@ -455,7 +458,7 @@ fun SetDataMap(
                     .fillMaxWidth()
                     .height(250.dp)
                     .clickable {
-                        if(it.enabled) onclick(it.route)
+                        if (it.enabled) onclick(it.route)
                     },
                 colors = CardDefaults.cardColors(it.color)
             ) {
