@@ -1,12 +1,16 @@
 package com.kal.brawlstatz2.viewmodel
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import com.google.firebase.database.BuildConfig
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.kal.brawlstatz2.data.ApkInfo
 import com.kal.brawlstatz2.data.Brawler
 import com.kal.brawlstatz2.data.MetaTier
 import com.kal.brawlstatz2.data.Trait
@@ -17,6 +21,7 @@ import com.kal.brawlstatz2.ui.theme.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.math.log
 
 class MainViewModel : ViewModel() {
     val list :ArrayList<Brawler> = ArrayList()
@@ -36,10 +41,27 @@ class MainViewModel : ViewModel() {
     val _upcomingList :ArrayList<Active> = ArrayList()
     val upcomingList: MutableState<List<Active>> = mutableStateOf(listOf())
 
-
+    val _info  = ApkInfo("","");
+    var isUpdateAvailable : MutableState<Boolean> = mutableStateOf(false)
     init {
+        appUpdater()
         fetchData()
         getData()
+    }
+
+    private fun appUpdater() {
+        FirebaseDatabase.getInstance().getReference("app").addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                _info.link= snapshot.child("link").value.toString()
+                _info.version= snapshot.child("version").value.toString();
+                if(_info.version != com.kal.brawlstatz2.BuildConfig.VERSION_NAME) isUpdateAvailable.value=true;
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
     }
 
 

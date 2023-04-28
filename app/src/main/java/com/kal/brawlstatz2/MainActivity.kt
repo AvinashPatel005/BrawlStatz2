@@ -2,6 +2,7 @@ package com.kal.brawlstatz2
 
 import android.app.Activity
 import android.os.Bundle
+import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -33,6 +34,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -318,14 +320,40 @@ class MainActivity : ComponentActivity() {
                     ) {
                         Box(
                             modifier = Modifier
+                                .fillMaxSize()
                                 .padding(
                                     top = it.calculateTopPadding(),
                                     bottom = it.calculateBottomPadding()
                                 )
                                 .background(Color(0xFF000000))
-                        ){
-                            Navigation(navController = navController)
-                            Divider()
+                        )
+                        {
+                                Navigation(navController = navController)
+                                Divider()
+
+                            if(viewModel.isUpdateAvailable.value){
+                                val uriHandler = LocalUriHandler.current
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center){
+                                    Card{
+                                        Column {
+                                            Text(text = "Update Available!")
+                                            Row {
+                                                Button(onClick = {
+                                                    viewModel.isUpdateAvailable.value=false
+                                                }) {
+                                                    Text(text = "Cancel")
+                                                }
+                                                Button(onClick = {
+
+                                                    uriHandler.openUri(viewModel._info.link)
+                                                }) {
+                                                    Text(text = "Update")
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
