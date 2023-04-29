@@ -2,7 +2,6 @@ package com.kal.brawlstatz2
 
 import android.app.Activity
 import android.os.Bundle
-import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -27,11 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -147,7 +150,9 @@ class MainActivity : ComponentActivity() {
                                                  Row(
                                                      verticalAlignment = Alignment.CenterVertically
                                                  ){
-
+                                                     if(tabCurrent=="events"){
+                                                         Text(text = "BETA    ", color = Color.Gray, fontSize = 9.sp)
+                                                     }
                                                      AnimatedVisibility(visible = (isSearch && tabCurrent=="brawler") , enter = fadeIn(),
                                                         exit = fadeOut()) {
 
@@ -301,7 +306,7 @@ class MainActivity : ComponentActivity() {
                             BottomNavBar(
                                 items = listOf(
                                     BottomNavItem("BRAWLER","brawler", Icons.Default.Home),
-                                    BottomNavItem("MAP","map", Icons.Default.Notifications),
+                                    BottomNavItem("EVENTS","events", Icons.Default.Notifications),
                                     BottomNavItem("META","meta", Icons.Default.Settings)
                                 ),
                                 navController = navController,
@@ -332,27 +337,7 @@ class MainActivity : ComponentActivity() {
                                 Divider()
 
                             if(viewModel.isUpdateAvailable.value){
-                                val uriHandler = LocalUriHandler.current
-                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center){
-                                    Card{
-                                        Column {
-                                            Text(text = "Update Available!")
-                                            Row {
-                                                Button(onClick = {
-                                                    viewModel.isUpdateAvailable.value=false
-                                                }) {
-                                                    Text(text = "Cancel")
-                                                }
-                                                Button(onClick = {
-
-                                                    uriHandler.openUri(viewModel._info.link)
-                                                }) {
-                                                    Text(text = "Update")
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                                Update(viewModel)
                             }
                         }
                     }
@@ -391,7 +376,7 @@ class MainActivity : ComponentActivity() {
                 }
                 BrawlersList(brawler = brawlers,isSearching,viewModel)
             }
-            composable("map",
+            composable("events",
                 enterTransition = {
                     if(navController.previousBackStackEntry?.destination?.route=="meta"){
                         slideInHorizontally(
@@ -433,6 +418,48 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@Composable
+fun Update(viewModel: MainViewModel) {
+    val uriHandler = LocalUriHandler.current
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center){
+        Box(modifier = Modifier
+            .background(Color.Black.copy(alpha = 0.5f))
+            .fillMaxSize())
+        Card (
+            modifier = Modifier
+                .border(width = 2.dp, Color.Gray, shape = RoundedCornerShape(20.dp))
+                .fillMaxWidth(0.8f),
+            shape = RoundedCornerShape(20.dp),
+
+                ){
+            Box(modifier = Modifier.padding(10.dp)){
+
+                Column {
+                    Text(text = "Update Available! v${viewModel._info.version}", fontSize = 18.sp, color = chromatic)
+                    Text(text = "Changelog:", fontSize = 16.sp,color = rare)
+                    LazyColumn{
+                        items(viewModel.changelog.value.size){
+                            Text(text = "${it+1}. ${viewModel.changelog.value[it]}", fontSize = 14.sp)
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 40.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(text = "Later", color = epic, modifier = Modifier.clickable{
+                            viewModel.isUpdateAvailable.value=false
+                        })
+                        Text(text = "Update", color = epic, modifier = Modifier.clickable{
+                            uriHandler.openUri(viewModel._info.link)
+                        })
+                    }
+                }
+            }
+        }
+    }
+}
 @Composable
 fun BottomNavBar(
     items:List<BottomNavItem>,

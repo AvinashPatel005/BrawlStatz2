@@ -190,7 +190,7 @@ fun BrawlerCard(
                                         textAlign = TextAlign.Center,
                                         color = Color.White
                                     ),
-                                    modifier = Modifier
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
                             Row (

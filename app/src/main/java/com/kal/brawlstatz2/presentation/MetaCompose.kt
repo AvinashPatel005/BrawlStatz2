@@ -253,7 +253,7 @@ fun MetaCard(
                         }
                     }
                     HelperBox2(hide = (!hide)&&isVisible, helperText = t)
-                    Text(
+                    if(color!= Color.Cyan) Text(
                         text = "#" + (i + 1).toString(),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,

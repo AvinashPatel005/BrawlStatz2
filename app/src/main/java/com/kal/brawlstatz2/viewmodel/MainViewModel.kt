@@ -43,6 +43,9 @@ class MainViewModel : ViewModel() {
 
     val _info  = ApkInfo("","");
     var isUpdateAvailable : MutableState<Boolean> = mutableStateOf(false)
+
+    val _changelog : ArrayList<String> = ArrayList()
+    val changelog: MutableState<List<String>> = mutableStateOf(listOf())
     init {
         appUpdater()
         fetchData()
@@ -54,14 +57,19 @@ class MainViewModel : ViewModel() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 _info.link= snapshot.child("link").value.toString()
                 _info.version= snapshot.child("version").value.toString();
-                if(_info.version != com.kal.brawlstatz2.BuildConfig.VERSION_NAME) isUpdateAvailable.value=true;
+
+                for(snap in snapshot.child("changelog").children){
+                    _changelog.add(snap.value.toString())
+                }
+                changelog.value=_changelog
+                isUpdateAvailable.value = _info.version.toFloat() > com.kal.brawlstatz2.BuildConfig.VERSION_NAME.toFloat()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
             }
 
         })
+
     }
 
 
@@ -115,7 +123,7 @@ class MainViewModel : ViewModel() {
         val cTier: ArrayList<Brawler> = ArrayList()
         val dTier: ArrayList<Brawler> = ArrayList()
         val fTier: ArrayList<Brawler> = ArrayList()
-
+         val nTier: ArrayList<Brawler> = ArrayList()
         for(brawler in sortedMetaList){
             when(brawler.tier?.get(0)){
                 in '0'..'9' -> sTier.add(brawler)
@@ -124,14 +132,17 @@ class MainViewModel : ViewModel() {
                 'C' -> cTier.add(brawler)
                 'D' -> dTier.add(brawler)
                 'F' -> fTier.add(brawler)
+                'N' -> nTier.add(brawler)
             }
         }
+         if(nTier.isNotEmpty())mlist.add(MetaTier("N",nTier,Color.Cyan))
         mlist.add(MetaTier("S",sTier, Color(0xFFff7e7e)))
         mlist.add(MetaTier("A",aTier, Color(0xFFffbf7f)))
         mlist.add(MetaTier("B",bTier, Color(0xFFffde7f)))
         mlist.add(MetaTier("C",cTier, Color(0xFFfeff7f)))
         mlist.add(MetaTier("D",dTier, Color(0xFFbeff7d)))
         mlist.add(MetaTier("F",fTier, Color(0xFF7eff80)))
+
         nestedList.value=mlist
     }
 
