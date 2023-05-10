@@ -1,12 +1,17 @@
 package com.kal.brawlstatz2
 
 import android.app.Activity
+import android.content.ContentValues.TAG
+import android.content.Context.LOCATION_SERVICE
+import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,48 +28,62 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Bottom
+import androidx.compose.ui.Alignment.Companion.BottomEnd
+import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.TopEnd
+import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalMapOf
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.google.accompanist.navigation.animation.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.kal.brawlstatz2.data.BottomNavItem
 import com.kal.brawlstatz2.data.Events
-import com.kal.brawlstatz2.data.events.Active
-import com.kal.brawlstatz2.presentation.ShimmerListItem
+import com.kal.brawlstatz2.data.clubleague
 import com.kal.brawlstatz2.presentation.BrawlersList
-import com.kal.brawlstatz2.presentation.MapCard
+import com.kal.brawlstatz2.presentation.Curr
+import com.kal.brawlstatz2.presentation.ShimmerListItem
 import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
+import java.util.concurrent.TimeUnit
+
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -394,11 +413,11 @@ class MainActivity : ComponentActivity() {
                 ){
                 val navController1 = rememberAnimatedNavController()
                 AnimatedNavHost(navController = navController1, startDestination = "menu") {
-                    composable("menu") { SetDataMap(){route->
+                    composable("menu") { SetDataMap(viewModel){route->
                         navController1.navigate(route = route)
                     } }
-                    composable("curr") {Curr(viewModel.activeList.value)}
-                    composable("up") { Curr(viewModel.upcomingList.value) }
+                    composable("curr") {Curr(viewModel.activeList.value,viewModel,0) }
+                    composable("up") { Curr(viewModel.upcomingList.value,viewModel,1) }
                 }
 
 
@@ -493,43 +512,372 @@ fun BottomNavBar(
        }
     }
 }
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun SetDataMap(
-    onclick : (String) -> Unit
+    viewModel: MainViewModel,
+    onclick: (String) -> Unit
 ) {
     val eventCardList = listOf<Events>(
-        Events("CURRENT","curr", Color.Green,true),
-        Events("UPCOMING","up", Color.Blue,true),
-        Events("POWER LEAGUE","pow", Color.Cyan,false),
-        Events("SEASON","season", Color.Red,false),
-        Events("CLUB","club", Color.Yellow,false),
+        Events("CURRENT","curr", Color.Green,R.drawable.c1,true),
+        Events("UPCOMING","up", Color.Blue,R.drawable.c2,true)
     )
-    LazyVerticalGrid(columns = GridCells.Fixed(2),Modifier.padding(top = 2.dp, start = 4.dp,end=4.dp)){
-        items(eventCardList){
-            Card(
-                Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-                    .height(250.dp)
-                    .clickable {
-                        if (it.enabled) onclick(it.route)
-                    },
-                colors = CardDefaults.cardColors(it.color)
-            ) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center){
-                    Text(text = it.cardName)
+    Column() {
+        LazyVerticalGrid(columns = GridCells.Fixed(2),Modifier.padding(top = 2.dp, start = 4.dp,end=4.dp)){
+            items(eventCardList){
+                Card(
+                    Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .clickable {
+                            if (it.enabled) onclick(it.route)
+                        },
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
+                        Image(
+                            painter = painterResource(id = it.drawable),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop
+                        )
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .padding(10.dp)) {
+                            Text(
+                                text = it.cardName,
+                                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                    textIndent = TextIndent(0.sp),
+                                    fontSize = 20.sp
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+            item{
+                Card(
+                    Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .clickable {
+                        },
+
+                    ) {
+                    Box(modifier = Modifier
+                        .fillMaxSize(), contentAlignment = TopEnd){
+
+                        val timeStamp: String = java.lang.String.valueOf(
+                            TimeUnit.MILLISECONDS.toSeconds(
+                                System.currentTimeMillis()
+                            )
+                        )
+                        val currtime : Long = timeStamp.toLong()*1000
+                        val difTime = viewModel.bp.value[0].toLong().minus(currtime)
+                        val dayLeft = difTime/86400000;
+                        val hourLeft = (difTime%86400000)/3600000
+                        val minLeft = ((difTime%86400000)%3600000)/60000
+                        GlideImage(model = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/bpb.webp?alt=media&token=${viewModel.bp.value[2]}", contentDescription = null,
+                            modifier = Modifier.fillMaxHeight()
+                        ){
+                            it.centerCrop()
+                        }
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .padding(10.dp)){
+                            Text(text = "BRAWL PASS", style=MaterialTheme.typography.bodyMedium + TextStyle(
+                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                textIndent = TextIndent(0.sp),
+                                fontSize = 20.sp
+                            ),modifier = Modifier.align(
+                                TopStart))
+                            Column(modifier = Modifier.align(Center)) {
+                                Text(text = viewModel.bp.value[1], fontSize = 22.sp, textAlign = TextAlign.End, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+                                Text(text = "Season ${viewModel.bp.value[2]}", modifier = Modifier.align(
+                                    Alignment.End))
+                            }
+                            Image(painter = painterResource(id = R.drawable.bp), contentDescription = null, modifier = Modifier
+                                .align(
+                                    BottomStart
+                                )
+                                .size(80.dp, 42.dp)
+                                .rotate(-5f))
+
+                            Text(
+                                text = if(difTime>0) {"${dayLeft}d ${hourLeft}h ${minLeft}m"} else "ENDED",
+                                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                    textIndent = TextIndent(0.sp),
+                                    color = if(dayLeft==0L) Color.Red else Color.White
+                                ),
+                                modifier = Modifier
+                                    .background(Color.Gray.copy(alpha = 0.3f))
+                                    .align(
+                                        BottomEnd
+                                    )
+                            )
+                        }
+
+
+                    }
+                }
+            }
+
+            item{
+                Card(
+                    Modifier
+                        .padding(4.dp)
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .clickable {
+                        },
+
+                    ) {
+                    Box(modifier = Modifier
+                        .fillMaxSize(), contentAlignment = TopEnd){
+
+                        val timeStamp: String = java.lang.String.valueOf(
+                            TimeUnit.MILLISECONDS.toSeconds(
+                                System.currentTimeMillis()
+                            )
+                        )
+                        val currtime : Long = timeStamp.toLong()*1000
+                        val difTime = viewModel.pl.value[0].toLong().minus(currtime)
+                        val dayLeft = difTime/86400000;
+                        val hourLeft = (difTime%86400000)/3600000
+                        val minLeft = ((difTime%86400000)%3600000)/60000
+                        GlideImage(model = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/bpb1.webp?alt=media&token=${viewModel.pl.value[1]}", contentDescription = null,
+                            modifier = Modifier.fillMaxHeight()
+                        ){
+                            it.centerCrop()
+                        }
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .padding(10.dp)){
+                            Text(text = "POWER LEAGUE", style=MaterialTheme.typography.bodyMedium + TextStyle(
+                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                textIndent = TextIndent(0.sp),
+                                fontSize = 20.sp
+                            ),modifier = Modifier.align(
+                                TopStart))
+                            Text(text = "Season ${viewModel.pl.value[1]}", fontWeight = FontWeight.Bold, modifier = Modifier.align(
+                                CenterEnd))
+                            Image(painter = painterResource(id = R.drawable.pl), contentDescription = null, modifier = Modifier
+                                .align(
+                                    BottomStart
+                                )
+                                .size(60.dp)
+                                .rotate(-5f))
+                            Text(
+                                text = if(difTime>0) {"${dayLeft}d ${hourLeft}h ${minLeft}m"} else "ENDED",
+                                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                    textIndent = TextIndent(0.sp),
+                                    color = if(dayLeft==0L) Color.Red else Color.White
+                                ),
+                                modifier = Modifier
+                                    .background(Color.Gray.copy(alpha = 0.3f))
+                                    .align(
+                                        BottomEnd
+                                    )
+                            )
+                        }
+
+
+                    }
                 }
             }
         }
-    }
-}
-@Composable
-fun Curr(value: List<Active>) {
-    LazyColumn(
-        Modifier.fillMaxSize()
-    ){
-        items(value){
-            MapCard(active = it)
+        val iscl = viewModel.cl.value[1] == "cg"
+        if(iscl){
+            val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
+            val dayLeft = difTime/86400000;
+            val hourLeft = (difTime%86400000)/3600000
+            val minLeft = ((difTime%86400000)%3600000)/60000
+            Card(
+                Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .fillMaxSize()
+                    .clickable {
+                    },
+
+                ){
+                Box(){
+                    Image(painter = painterResource(id = R.drawable.clb), contentDescription = null , modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop )
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.7f))
+                        .padding(10.dp)) {
+                            Text(text =  "CLUB GAMES",style=MaterialTheme.typography.bodyMedium + TextStyle(
+                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                textIndent = TextIndent(0.sp),
+                                fontSize = 20.sp
+                            ), modifier = Modifier.align(TopStart))
+                            Text(text = "${dayLeft}d ${hourLeft}h ${minLeft}m", modifier = Modifier
+                                .align(
+                                    BottomEnd
+                                )
+                                .background(Color.Gray.copy(alpha = 0.3f))
+                                .align(
+                                    BottomEnd
+                                ),
+                                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                    textIndent = TextIndent(0.sp),
+                                    color = if(dayLeft==0L) Color.Red else Color.White
+                                ))
+
+                        Row(modifier = Modifier
+                            .align(
+                                BottomStart
+                            )){
+                            Image(painter = painterResource(id = R.drawable.cg), contentDescription = null, modifier = Modifier
+                                .size(68.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.align(Bottom)) {
+                                Text("QUEST WEEK",
+                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                        textIndent = TextIndent(0.sp),
+                                        fontSize = 18.sp
+                                    ), modifier = Modifier.offset(y=(4).dp))
+                                Text("Complete quests with your club!",
+                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                        textIndent = TextIndent(0.sp),
+                                        fontSize = 12.sp
+                                    )
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                            }
+                        }
+                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.align(TopEnd)) {
+                            Text(text = " Club League in",
+                                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                    textIndent = TextIndent(0.sp),
+                                    fontSize = 12.sp
+                                ))
+                            Text(text = "${dayLeft}d ${hourLeft}h",
+                                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                    textIndent = TextIndent(0.sp),
+                                    fontSize = 12.sp,
+                                    color = if(dayLeft==0L) Color.Red else Color.White
+                                ), modifier = Modifier.offset(y=(-4).dp))
+                        }
+                    }
+                }
+            }
         }
+        else{
+            val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
+            val dayLeft = difTime/86400000;
+            val hourLeft = (difTime%86400000)/3600000
+            val minLeft = ((difTime%86400000)%3600000)/60000
+
+            val clEvent = listOf<clubleague>(
+                clubleague(1,"EVENT DAY 1",0,"Preparation !"),
+                clubleague(2,"EVENT DAY 1",4,"Compete with your club!"),
+                clubleague(3,"EVENT DAY 2",0,"Preparation !"),
+                clubleague(4,"EVENT DAY 2",4,"Compete with your club!"),
+                clubleague(5,"EVENT DAY 3",0,"Preparation !"),
+                clubleague(6,"EVENT DAY 3",6,"Compete with your club!"),
+                clubleague(7,"EVENT ENDED",0,"Club Games will start soon!")
+            )
+            val day = 7-dayLeft-1
+            Card(
+                Modifier
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .fillMaxSize()
+                    .clickable {
+                    },
+
+                ){
+                Box(){
+                    Image(painter = painterResource(id = R.drawable.clb), contentDescription = null , modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop )
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.7f))
+                        .padding(10.dp)) {
+                        Text(text =  "CLUB LEAGUE",style=MaterialTheme.typography.bodyMedium + TextStyle(
+                            shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                            textIndent = TextIndent(0.sp),
+                            fontSize = 20.sp
+                        ), modifier = Modifier.align(TopStart))
+                        Text(text = if(day == 6L) "ENDED" else "${hourLeft}h ${minLeft}m", modifier = Modifier
+                            .align(
+                                BottomEnd
+                            )
+                            .background(Color.Gray.copy(alpha = 0.3f))
+                            .align(
+                                BottomEnd
+                            ),
+                            style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                textIndent = TextIndent(0.sp),
+                                color = if(dayLeft==0L) Color.Red else Color.White
+                            ))
+
+                        Row(modifier = Modifier
+                            .align(
+                                BottomStart
+                            )){
+                            Image(painter = painterResource(id = R.drawable.pm), contentDescription = null, modifier = Modifier
+                                .size(68.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.align(Bottom)) {
+                                Text(clEvent[day.toInt()].name,
+                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                        textIndent = TextIndent(0.sp),
+                                        fontSize = 18.sp
+                                    ), modifier = Modifier.offset(y=(4).dp))
+                                Text(clEvent[day.toInt()].text,
+                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                        textIndent = TextIndent(0.sp),
+                                        fontSize = 12.sp
+                                    )
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                            }
+                        }
+                        if(clEvent[day.toInt()].ticket!=0){
+                            Row (verticalAlignment = Alignment.CenterVertically,modifier = Modifier.align(CenterEnd)){
+                                Image(painter = painterResource(id = R.drawable.ct), contentDescription = null, modifier = Modifier
+                                    .size(30.dp))
+                                Text(text = " x${clEvent[day.toInt()].ticket}",
+                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                        textIndent = TextIndent(0.sp),
+                                        fontSize = 20.sp
+                                    ))
+                            }
+                        }
+                        Column(horizontalAlignment = Alignment.End, modifier = Modifier.align(TopEnd)) {
+                            Text(text = " Club Games in",
+                                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                    textIndent = TextIndent(0.sp),
+                                    fontSize = 12.sp
+                                ))
+                            Text(text = "${dayLeft}d ${hourLeft}h",
+                                style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                    textIndent = TextIndent(0.sp),
+                                    fontSize = 12.sp,
+                                    color = if(dayLeft==0L) Color.Red else Color.White
+                                ), modifier = Modifier.offset(y=(-4).dp))
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

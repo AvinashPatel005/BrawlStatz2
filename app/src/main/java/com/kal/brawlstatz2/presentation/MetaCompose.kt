@@ -196,7 +196,8 @@ fun MetaCard(
                                                         brawler.bname.toString(),
                                                         true
                                                     )
-                                                clicked = 1
+                                                clicked = if(clicked==1) 0
+                                                else 1
                                             },
                                     )
                                     if(clicked==1&&isVisible)
@@ -221,7 +222,8 @@ fun MetaCard(
                                                         brawler.bname.toString(),
                                                         true
                                                     )
-                                                clicked = 2
+                                                clicked = if(clicked==2) 0
+                                                else 2
                                             },
                                     )
                                     if(clicked==2&&isVisible)
@@ -242,10 +244,10 @@ fun MetaCard(
                     var hide = false
                     when(clicked){
                         1->{
-                            t = if(brawler.bstarpower.equals("1")) brawler.s1t.toString() else brawler.s2t.toString()
+                            t = if(brawler.bstarpower.equals("1")) brawler.s1t.toString() else if(brawler.bstarpower.equals("2")) brawler.s2t.toString() else ""
                         }
                         2->{
-                            t = if(brawler.bgadget.equals("1")) brawler.g1t.toString() else brawler.g2t.toString()
+                            t = if(brawler.bgadget.equals("1")) brawler.g1t.toString() else if(brawler.bgadget.equals("2")) brawler.g2t.toString() else ""
                         }
                         else -> {
                             t = ""
@@ -274,7 +276,7 @@ fun HelperBox2(
     helperText: String,
     modifier: Modifier=Modifier
 ) {
-    AnimatedVisibility(visible = hide , enter = fadeIn()) {
+    AnimatedVisibility(visible = hide&&helperText!="" , enter = fadeIn()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.7f)

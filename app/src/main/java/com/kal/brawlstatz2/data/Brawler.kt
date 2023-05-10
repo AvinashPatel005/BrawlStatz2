@@ -2,6 +2,7 @@ package com.kal.brawlstatz2.data
 
 import androidx.compose.ui.graphics.Color
 data class Brawler(
+    val id: Int?=0,
     val bname: String?=null,
     val brare: String?=null,
     var bpro: String?=null,
@@ -36,7 +37,7 @@ data class Brawler(
     var color : Color=Color.Black,
 
 ){
-    constructor() :this(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+    constructor() :this(0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
         Color.Black)
 }
 

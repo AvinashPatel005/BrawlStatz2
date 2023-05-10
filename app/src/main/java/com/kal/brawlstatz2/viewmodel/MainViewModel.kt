@@ -5,11 +5,14 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.database.BuildConfig
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.kal.brawlstatz2.data.ApkInfo
 import com.kal.brawlstatz2.data.Brawler
 import com.kal.brawlstatz2.data.MetaTier
@@ -22,6 +25,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import kotlin.math.log
+import kotlin.time.Duration.Companion.days
 
 class MainViewModel : ViewModel() {
     val list :ArrayList<Brawler> = ArrayList()
@@ -46,10 +50,83 @@ class MainViewModel : ViewModel() {
 
     val _changelog : ArrayList<String> = ArrayList()
     val changelog: MutableState<List<String>> = mutableStateOf(listOf())
+
+    val _bp :ArrayList<String> = ArrayList()
+    val bp: MutableState<List<String>> = mutableStateOf(listOf())
+    val _pl :ArrayList<String> = ArrayList()
+    val pl: MutableState<List<String>> = mutableStateOf(listOf())
+    val _cl :ArrayList<String> = ArrayList()
+    val cl: MutableState<List<String>> = mutableStateOf(listOf())
+    var timeFromServer : MutableState<Long> = mutableStateOf(0)
     init {
         appUpdater()
         fetchData()
         getData()
+        getEvent()
+        getCurrTime()
+    }
+
+    private fun getCurrTime() {
+
+        Firebase.database.reference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                _cl.clear()
+                val offset = snapshot.child(".info/serverTimeOffset").getValue(Double::class.java) ?: 0.0
+                val estimatedServerTimeMs = System.currentTimeMillis() + offset
+                timeFromServer.value = estimatedServerTimeMs.toLong();
+                _cl.add(snapshot.child("clubleague/endtimestamp").value.toString())
+                _cl.add(snapshot.child("clubleague/eventname").value.toString())
+
+                cl.value=_cl;
+                val diff1 = (timeFromServer.value-cl.value[0].toLong())
+                val diff = diff1/86400000
+
+                if(diff1>=0){
+                    if( diff<7){
+                        Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+7*86400000)
+                        Firebase.database.getReference("clubleague/eventname").setValue(if(cl.value[1]=="cl") "cg" else "cl")
+
+                    }
+                    else if(diff in 7..13){
+                        Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+14*86400000)
+                    }
+                    else if((diff/7)%2 == 1L ){
+                        Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+((7-diff%7)+diff)*86400000)
+                    }
+
+                    else{
+
+                        Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+((7-diff%7)+diff)*86400000)
+                        Firebase.database.getReference("clubleague/eventname").setValue(if(cl.value[1]=="cl") "cg" else "cl")
+
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w(TAG, "Listener was cancelled")
+            }
+        })
+    }
+    
+    private fun getEvent() {
+       
+        FirebaseDatabase.getInstance().reference.addValueEventListener(object: ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+               _bp.add(snapshot.child("brawlpass/enddate").value.toString())
+                _bp.add(snapshot.child("brawlpass/name").value as String)
+                _bp.add(snapshot.child("brawlpass/season").value.toString())
+
+                _pl.add(snapshot.child("powerleague/enddate").value.toString())
+                _pl.add(snapshot.child("powerleague/season").value.toString())
+                bp.value=_bp
+                pl.value=_pl
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+            }
+
+        })
     }
 
     private fun appUpdater() {
