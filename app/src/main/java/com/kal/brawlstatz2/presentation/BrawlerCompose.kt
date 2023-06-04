@@ -2,6 +2,7 @@ package com.kal.brawlstatz2.presentation
 
 import android.app.Activity
 import android.widget.Toast
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -153,6 +154,7 @@ fun BrawlerCard(
             Column {
                 Row(
                     modifier= Modifier
+                        .animateContentSize()
                         .fillMaxWidth()
                         .height(if (isExp) 114.dp else cardHeight)
                         .padding(
@@ -163,14 +165,15 @@ fun BrawlerCard(
                         ),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row {
+                    Row (){
                         ImageAsync(
                             url = brawler.bpro.toString(),
                             placeholder = R.drawable.placeholder1,
-                            modifier = Modifier.size(if (isExp) 110.dp else 84.dp)
+                            modifier = Modifier
+                                .size(if (isExp) 110.dp else 84.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Column {
+                        Column (){
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = brawler.bname.toString(),
@@ -194,18 +197,20 @@ fun BrawlerCard(
                             )
                             val activity = (LocalContext.current as? Activity)
                             if(brawler.trait!="null") {
+                                Spacer(modifier = Modifier.height(2.dp))
                                 ImageAsync2(string = brawler.trait.toString(), modifier = Modifier
-                                    .clickable {
-                                        for (ts in viewModel.traits) {
-                                            if (brawler.trait!!.contains(ts.tName)) Toast.makeText(activity,ts.tDis,Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
                                 )
+                                for (ts in viewModel.traits) {
+                                    Spacer(modifier = Modifier.height(1.dp))
+                                    if (brawler.trait!!.contains(ts.tName)) HelperBox3(hide = isExp, helperText = ts.tDis.toString(), modifier = Modifier.width(110.dp))
+                                }
+
                             }
                         }
                     }
                     Row(
-                        modifier = Modifier.align(Alignment.Bottom),
+                        modifier = Modifier
+                            .align(Alignment.Bottom),
                     ) {
                         CounterColumn(
                             url = brawler.c1.toString(),

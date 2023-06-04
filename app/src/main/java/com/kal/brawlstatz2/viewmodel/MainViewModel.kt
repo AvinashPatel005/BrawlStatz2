@@ -58,7 +58,7 @@ class MainViewModel : ViewModel() {
     val _cl :ArrayList<String> = ArrayList()
     val cl: MutableState<List<String>> = mutableStateOf(listOf())
     var timeFromServer : MutableState<Long> = mutableStateOf(0)
-    var metaVer : MutableState<Long> = mutableStateOf(0)
+    var metaVer : MutableState<String> = mutableStateOf("")
     init {
         appUpdater()
         fetchData()
@@ -116,7 +116,7 @@ class MainViewModel : ViewModel() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 _bp.clear()
                 _pl.clear()
-                metaVer.value = snapshot.child("metaVersion").value as Long
+                metaVer.value = snapshot.child("metaVersion").value as String
                _bp.add(snapshot.child("brawlpass/enddate").value.toString())
                 _bp.add(snapshot.child("brawlpass/name").value as String)
                 _bp.add(snapshot.child("brawlpass/season").value.toString())

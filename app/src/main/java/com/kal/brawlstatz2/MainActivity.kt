@@ -147,7 +147,7 @@ class MainActivity : ComponentActivity() {
                                                      "BrawlStatz2",
                                                      maxLines = 1,
                                                      overflow = TextOverflow.Ellipsis,
-                                                     color = Color.White,
+                                                     color = Color(0xFFd2d4d2),
                                                      fontWeight = FontWeight.Bold,
                                                  )
                                              }
@@ -178,7 +178,7 @@ class MainActivity : ComponentActivity() {
                                                      )
                                                  } else if (tabCurrent == "meta") {
                                                      Text(
-                                                         text = "V${viewModel.metaVer.value}(KT)   ",
+                                                         text = "V${viewModel.metaVer.value} ",
                                                          color = Color.Gray,
                                                          fontSize = 9.sp
                                                      )
@@ -379,8 +379,8 @@ fun BottomNavBar(
 ) {
     val backStackEntry = navController.currentBackStackEntryAsState()
     NavigationBar(
-        modifier = Modifier.height(45.dp),
-        tonalElevation = 0.dp,
+        modifier = Modifier.height(50.dp),
+        tonalElevation = 1000.dp,
     ){
        Column {
            Divider()
@@ -415,7 +415,7 @@ fun SetDataMap(
         Events("UPCOMING","up", Color.Blue,R.drawable.c2,true)
     )
     Column(Modifier.padding(vertical = 6.dp)) {
-        Row(Modifier.weight(3.5f)){
+        Row(Modifier.weight(3.1f)){
             Spacer(modifier = Modifier.width(3.dp))
             for(it in eventCardList){
                 Spacer(modifier = Modifier.width(3.dp))
@@ -453,7 +453,7 @@ fun SetDataMap(
             Spacer(modifier = Modifier.width(3.dp))
         }
         Spacer(modifier = Modifier.height(6.dp))
-        Row (Modifier.weight(3.5f)){
+        Row (Modifier.weight(3.1f)){
             Spacer(modifier = Modifier.width(6.dp))
             Card(
                 Modifier

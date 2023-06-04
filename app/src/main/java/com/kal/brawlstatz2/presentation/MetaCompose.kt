@@ -317,6 +317,35 @@ fun HelperBox2(
         }
     }
 }
+@Composable
+fun HelperBox3(
+    hide: Boolean,
+    helperText: String,
+    modifier: Modifier=Modifier
+) {
+    if(hide&&helperText!="") {
+
+            Box(
+                modifier = modifier
+                    .border(1.dp, Color.White, RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color.White)
+                    .padding(horizontal = 2.dp)
+            ) {
+                Text(
+                    text = helperText,
+                    fontSize = 9.sp,
+                    fontStyle = FontStyle.Italic,
+                    style = TextStyle(
+                        textIndent = TextIndent(0.sp),
+                        textAlign = TextAlign.Center,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+    }
+}
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ImageAsync2(string:String,modifier: Modifier=Modifier) {
