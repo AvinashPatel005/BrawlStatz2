@@ -58,6 +58,7 @@ class MainViewModel : ViewModel() {
     val _cl :ArrayList<String> = ArrayList()
     val cl: MutableState<List<String>> = mutableStateOf(listOf())
     var timeFromServer : MutableState<Long> = mutableStateOf(0)
+    var metaVer : MutableState<Long> = mutableStateOf(0)
     init {
         appUpdater()
         fetchData()
@@ -66,7 +67,7 @@ class MainViewModel : ViewModel() {
         getCurrTime()
     }
 
-    private fun getCurrTime() {
+    fun getCurrTime() {
 
         Firebase.database.reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -109,10 +110,13 @@ class MainViewModel : ViewModel() {
         })
     }
     
-    private fun getEvent() {
+    fun getEvent() {
        
         FirebaseDatabase.getInstance().reference.addValueEventListener(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
+                _bp.clear()
+                _pl.clear()
+                metaVer.value = snapshot.child("metaVersion").value as Long
                _bp.add(snapshot.child("brawlpass/enddate").value.toString())
                 _bp.add(snapshot.child("brawlpass/name").value as String)
                 _bp.add(snapshot.child("brawlpass/season").value.toString())
@@ -132,6 +136,7 @@ class MainViewModel : ViewModel() {
     private fun appUpdater() {
         FirebaseDatabase.getInstance().getReference("app").addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
+                _changelog.clear()
                 _info.link= snapshot.child("link").value.toString()
                 _info.version= snapshot.child("version").value.toString();
 
@@ -150,9 +155,11 @@ class MainViewModel : ViewModel() {
     }
 
 
-    private fun getData(){
+    fun getData(){
         RetrofitInstance.apiInterface.getData().enqueue(object : Callback<event?> {
             override fun onResponse(call: Call<event?>, response: Response<event?>) {
+                _activeList.clear()
+                _upcomingList.clear()
                 response.body()?.active?.filter { it.slot.name.contains("Daily") }?.let { _activeList.addAll(it) }
                 response.body()?.active?.filter { it.slot.name.contains("Weekly") }?.let { _activeList.addAll(it) }
                 _activeList.removeAll(_activeList.filter { it.map.hash.contains("-Duo") }.toSet())
@@ -212,7 +219,7 @@ class MainViewModel : ViewModel() {
                 'N' -> nTier.add(brawler)
             }
         }
-         if(nTier.isNotEmpty())mlist.add(MetaTier("N",nTier,Color.Cyan))
+         if(nTier.isNotEmpty())mlist.add(MetaTier("NEW",nTier,Color.Cyan))
         mlist.add(MetaTier("S",sTier, Color(0xFFff7e7e)))
         mlist.add(MetaTier("A",aTier, Color(0xFFffbf7f)))
         mlist.add(MetaTier("B",bTier, Color(0xFFffde7f)))

@@ -65,13 +65,14 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.kal.brawlstatz2.data.BottomNavItem
 import com.kal.brawlstatz2.data.Events
 import com.kal.brawlstatz2.data.clubleague
@@ -107,15 +108,13 @@ class MainActivity : ComponentActivity() {
                     var tabCurrent by remember{
                         mutableStateOf("brawler")
                     }
-                var selectedSort by remember {
-                    mutableStateOf(0)
-                }
+
                 var selectedSortMeta by remember {
                     mutableStateOf(0)
                 }
 
                     val focusManager = LocalFocusManager.current
-                    val navController = rememberAnimatedNavController()
+                    val navController = rememberNavController()
                 navController.enableOnBackPressed(enabled = false)
                 val activity = (LocalContext.current as? Activity)
                 BackHandler {
@@ -139,18 +138,17 @@ class MainActivity : ComponentActivity() {
                     }
                     Scaffold(
                         topBar = {
-                                 Column{
+                                 Column {
 
                                      TopAppBar(
                                          title = {
-                                             if(!isSearch){
+                                             if (!isSearch) {
                                                  Text(
                                                      "BrawlStatz2",
                                                      maxLines = 1,
                                                      overflow = TextOverflow.Ellipsis,
                                                      color = Color.White,
                                                      fontWeight = FontWeight.Bold,
-                                                     fontFamily = FontFamily.Serif
                                                  )
                                              }
                                          },
@@ -159,56 +157,71 @@ class MainActivity : ComponentActivity() {
                                              Icon(
                                                  painter = painterResource(id = R.drawable.logo_menu),
                                                  contentDescription = null,
-                                                 modifier = Modifier.padding(start = 10.dp, end = 4.dp),
+                                                 modifier = Modifier.padding(
+                                                     start = 10.dp,
+                                                     end = 4.dp
+                                                 ),
                                                  tint = Color.White
                                              )
                                          },
 
                                          actions = {
 
-                                                 Row(
-                                                     verticalAlignment = Alignment.CenterVertically
-                                                 ){
-                                                     if(tabCurrent=="events"){
-                                                         Text(text = "BETA    ", color = Color.Gray, fontSize = 9.sp)
-                                                     }
-                                                     AnimatedVisibility(visible = (isSearch && tabCurrent=="brawler") , enter = fadeIn(),
-                                                        exit = fadeOut()) {
+                                             Row(
+                                                 verticalAlignment = Alignment.CenterVertically
+                                             ) {
+                                                 if (tabCurrent == "events") {
+                                                     Text(
+                                                         text = "EVENTS    ",
+                                                         color = Color.Gray,
+                                                         fontSize = 9.sp
+                                                     )
+                                                 } else if (tabCurrent == "meta") {
+                                                     Text(
+                                                         text = "V${viewModel.metaVer.value}(KT)   ",
+                                                         color = Color.Gray,
+                                                         fontSize = 9.sp
+                                                     )
+                                                 }
+                                                 AnimatedVisibility(
+                                                     visible = (isSearch && tabCurrent == "brawler"),
+                                                     enter = fadeIn(),
+                                                     exit = fadeOut()
+                                                 ) {
 
-                                                         isVisible = !isVisible
-                                                         OutlinedTextField(
-                                                             value = value,
-                                                             onValueChange = {
-                                                                 viewModel.isSearching.value = true
-                                                                 value = it
-                                                                 viewModel.find(value.lowercase())
-                                                             },
-                                                             modifier = Modifier
-                                                                 .focusRequester(focusRequester)
-                                                                 .scale(scaleY = 0.9F, scaleX = 1F),
+                                                     isVisible = !isVisible
+                                                     OutlinedTextField(
+                                                         value = value,
+                                                         onValueChange = {
+                                                             viewModel.isSearching.value = true
+                                                             value = it
+                                                             viewModel.find(value.lowercase())
+                                                         },
+                                                         modifier = Modifier
+                                                             .focusRequester(focusRequester)
+                                                             .scale(scaleY = 0.9F, scaleX = 1F),
 
-                                                             placeholder = { Text(text = "Search") },
-                                                             shape = RoundedCornerShape(100),
-                                                             colors = OutlinedTextFieldDefaults.colors(
-                                                                 focusedContainerColor = PurpleGrey40,
-                                                                 unfocusedContainerColor = PurpleGrey40,
-                                                                 disabledContainerColor = PurpleGrey40,
-                                                                 focusedBorderColor = Color.Black,
-                                                                 unfocusedBorderColor = Color.Black,
-                                                                 cursorColor = PurpleGrey80
-                                                             )
+                                                         placeholder = { Text(text = "Search") },
+                                                         shape = RoundedCornerShape(100),
+                                                         colors = OutlinedTextFieldDefaults.colors(
+                                                             focusedContainerColor = PurpleGrey40,
+                                                             unfocusedContainerColor = PurpleGrey40,
+                                                             disabledContainerColor = PurpleGrey40,
+                                                             focusedBorderColor = Color.Black,
+                                                             unfocusedBorderColor = Color.Black,
+                                                             cursorColor = PurpleGrey80
                                                          )
-                                                     }
-                                                     Card(
-                                                         modifier = Modifier.clip(RoundedCornerShape(100))
-                                                     ) {
-                                                     if(tabCurrent=="brawler") {
+                                                     )
+                                                 }
+                                                 Card(
+                                                     modifier = Modifier.clip(RoundedCornerShape(100))
+                                                 ) {
+                                                     if (tabCurrent == "brawler") {
                                                          IconButton(onClick = {
                                                              if (value == "") {
                                                                  isSearch = !isSearch
                                                                  viewModel.isSearching.value = false
-                                                             }
-                                                             else {
+                                                             } else {
                                                                  value = ""
                                                                  viewModel.find(value.lowercase())
                                                              }
@@ -217,108 +230,14 @@ class MainActivity : ComponentActivity() {
                                                              Icon(
                                                                  if (isSearch) Icons.Default.Close
                                                                  else Icons.Default.Search,
-                                                                 contentDescription = "search"
+                                                                 contentDescription = "search",
                                                              )
-
                                                          }
                                                      }
                                                  }
                                              }
                                          }
                                      )
-
-                                     if(tabCurrent=="brawler"){
-                                         LazyRow(
-                                             modifier = Modifier
-                                                 .background(Color(0xFF000000))
-                                                 .height(40.dp)
-                                         ) {
-                                             val list  = listOf("All","Traits","Chromatic","Legendary","Mythic","Epic","Super Rare","Rare","Starting")
-                                             items(list){s ->
-                                                 Spacer(modifier = Modifier.width(10.dp))
-                                                 Button(
-                                                     modifier =if(s=="Traits") {
-                                                         Modifier
-                                                             .border(
-                                                                 width = 2.dp,
-                                                                 color = Color.Gray,
-                                                                 shape = RoundedCornerShape(8.dp)
-                                                             )
-                                                             .height(35.dp)
-                                                                    }
-                                                     else {
-                                                         Modifier.height(35.dp)
-                                                          },
-                                                     onClick = {
-                                                         if(selectedSort==list.indexOf(s)&&selectedSort!=0){
-                                                             selectedSort=0
-                                                             viewModel.find("")
-                                                         }
-                                                         else{
-                                                             selectedSort = list.indexOf(s)
-                                                             if(s=="All") viewModel.find("")
-                                                             else  viewModel.find(s.lowercase())
-                                                         }
-                                                     },
-                                                     colors = if(selectedSort==list.indexOf(s)) ButtonDefaults.buttonColors(Color(0xffeeeee4)) else ButtonDefaults.buttonColors(Color(0xFF202124)),
-                                                     shape = RoundedCornerShape(8.dp),
-                                                     contentPadding = PaddingValues(8.dp)
-                                                 ) {
-                                                     Text(text = s, color = if(selectedSort!=list.indexOf(s)) Color(0xffeeeee4) else Color(0xFF202124))
-                                                 }
-                                             }
-                                             item{
-                                                 Spacer(modifier = Modifier.width(10.dp))
-                                             }
-                                         }
-                                     }
-                                     else if(tabCurrent=="meta"){
-                                         LazyRow(
-                                             modifier = Modifier
-                                                 .background(Color(0xFF000000))
-                                                 .height(40.dp)
-                                         ) {
-                                             val list  = listOf("All","S","A","B","C","D","F")
-                                             items(list){s ->
-                                                 Spacer(modifier = Modifier.width(10.dp))
-                                                 Button(
-                                                     modifier = Modifier.height(35.dp),
-                                                     onClick = {
-                                                         if(selectedSortMeta==list.indexOf(s)&&selectedSortMeta!=0){
-                                                             selectedSortMeta=0
-                                                             viewModel.metaSorting()
-                                                         }
-                                                         else{
-                                                             selectedSortMeta=list.indexOf(s)
-                                                             if(s!="All") {
-                                                                 viewModel.metaFind(s[0])
-                                                             }
-                                                             else viewModel.metaSorting()
-                                                         }
-                                                     },
-                                                     colors = if(selectedSortMeta==list.indexOf(s)) ButtonDefaults.buttonColors(Color(0xffeeeee4)) else ButtonDefaults.buttonColors(Color(0xFF202124)),
-                                                     shape = RoundedCornerShape(8.dp),
-                                                     contentPadding = PaddingValues(8.dp)
-                                                 ) {
-                                                     Text(text = buildAnnotatedString
-                                                     {
-                                                         append(s)
-                                                         if(s!="All"){
-                                                             withStyle(style = SpanStyle(
-                                                                 fontSize = 7.sp,
-                                                                 color = Color.Gray
-                                                             )){
-                                                                 append("TIER")
-                                                             }
-                                                         }
-                                                     }, color = if(selectedSortMeta!=list.indexOf(s)) Color(0xffeeeee4) else Color(0xFF202124))
-                                                 }
-                                             }
-                                             item{
-                                                 Spacer(modifier = Modifier.width(10.dp))
-                                             }
-                                         }
-                                     }
                                  }
                         },
                         bottomBar = {
@@ -331,7 +250,7 @@ class MainActivity : ComponentActivity() {
                                 navController = navController,
                                 onItemClicked = {
                                     tabCurrent=it.route
-                                    selectedSort=0
+                                    //selectedSort=0
                                     selectedSortMeta=0
                                     isSearch=false
                                     value = ""
@@ -353,7 +272,7 @@ class MainActivity : ComponentActivity() {
                         )
                         {
                                 Navigation(navController = navController)
-                                Divider()
+                               
 
                             if(viewModel.isUpdateAvailable.value){
                                 Update(viewModel)
@@ -364,7 +283,6 @@ class MainActivity : ComponentActivity() {
             }
 
     }
-    @OptIn(ExperimentalAnimationApi::class)
     @Composable
     fun Navigation(navController: NavHostController) {
         val viewModel = viewModel<MainViewModel>()
@@ -372,47 +290,28 @@ class MainActivity : ComponentActivity() {
         val meta = viewModel.nestedList.value
         val isLoading = viewModel.isLoading.value
         val isSearching = viewModel.isSearching.value
-        AnimatedNavHost(navController = navController, startDestination = "brawler" ){
-            composable("brawler",
-                enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { -800 },
-                            animationSpec = tween(300)
-                        ) + fadeIn(animationSpec = tween(300))
-                }
-                ){
+        NavHost(navController = navController, startDestination = "brawler" ){
+            composable("brawler"){
                 if(isLoading){
-                    LazyColumn(modifier = Modifier.fillMaxSize()){
-                        items(20){
-                            ShimmerListItem(
-                                modifier = Modifier
-                                    .background(Color.Black)
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            )
-                        }
-                    }
+                   Column() {
+                       Spacer(modifier = Modifier.height(40.dp))
+                       LazyColumn(modifier = Modifier.fillMaxSize()){
+                           items(10){
+                               ShimmerListItem(
+                                   modifier = Modifier
+                                       .background(Color.Black)
+                                       .fillMaxWidth()
+                                       .padding(16.dp)
+                               )
+                           }
+                       }
+                   }
                 }
                 BrawlersList(brawler = brawlers,isSearching,viewModel)
             }
-            composable("events",
-                enterTransition = {
-                    if(navController.previousBackStackEntry?.destination?.route=="meta"){
-                        slideInHorizontally(
-                            initialOffsetX = { -800 },
-                            animationSpec = tween(300)
-                        ) + fadeIn(animationSpec = tween(300))
-                    }
-                    else {
-                        slideInHorizontally(
-                            initialOffsetX = { 800 },
-                            animationSpec = tween(300)
-                        ) + fadeIn(animationSpec = tween(300))
-                    }
-                }
-                ){
-                val navController1 = rememberAnimatedNavController()
-                AnimatedNavHost(navController = navController1, startDestination = "menu") {
+            composable("events"){
+                val navController1 = rememberNavController()
+                NavHost(navController = navController1, startDestination = "menu") {
                     composable("menu") { SetDataMap(viewModel){route->
                         navController1.navigate(route = route)
                     } }
@@ -423,14 +322,7 @@ class MainActivity : ComponentActivity() {
 
 
             }
-            composable("meta",
-                enterTransition = {
-                    slideInHorizontally(
-                        initialOffsetX = { 800 },
-                        animationSpec = tween(300)
-                    ) + fadeIn(animationSpec = tween(300))
-                }
-            ){
+            composable("meta"){
                 ShowMetaList(meta,viewModel.sortedMetaList)
             }
         }
@@ -522,17 +414,18 @@ fun SetDataMap(
         Events("CURRENT","curr", Color.Green,R.drawable.c1,true),
         Events("UPCOMING","up", Color.Blue,R.drawable.c2,true)
     )
-    Column() {
-        LazyVerticalGrid(columns = GridCells.Fixed(2),Modifier.padding(top = 2.dp, start = 4.dp,end=4.dp)){
-            items(eventCardList){
+    Column(Modifier.padding(vertical = 6.dp)) {
+        Row(Modifier.weight(3.5f)){
+            Spacer(modifier = Modifier.width(3.dp))
+            for(it in eventCardList){
+                Spacer(modifier = Modifier.width(3.dp))
                 Card(
                     Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                        .height(250.dp)
+                        .weight(1f)
                         .clickable {
                             if (it.enabled) onclick(it.route)
-                        },
+                        }
+                        ,
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center) {
                         Image(
@@ -555,155 +448,156 @@ fun SetDataMap(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.width(3.dp))
             }
-            item{
-                Card(
-                    Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                        .height(250.dp)
-                        .clickable {
-                        },
-
-                    ) {
-                    Box(modifier = Modifier
-                        .fillMaxSize(), contentAlignment = TopEnd){
-
-                        val timeStamp: String = java.lang.String.valueOf(
-                            TimeUnit.MILLISECONDS.toSeconds(
-                                System.currentTimeMillis()
-                            )
-                        )
-                        val currtime : Long = timeStamp.toLong()*1000
-                        val difTime = viewModel.bp.value[0].toLong().minus(currtime)
-                        val dayLeft = difTime/86400000;
-                        val hourLeft = (difTime%86400000)/3600000
-                        val minLeft = ((difTime%86400000)%3600000)/60000
-                        GlideImage(model = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/bpb.webp?alt=media&token=${viewModel.bp.value[2]}", contentDescription = null,
-                            modifier = Modifier.fillMaxHeight()
-                        ){
-                            it.centerCrop()
-                        }
-                        Box(modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.6f))
-                            .padding(10.dp)){
-                            Text(text = "BRAWL PASS", style=MaterialTheme.typography.bodyMedium + TextStyle(
-                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                textIndent = TextIndent(0.sp),
-                                fontSize = 20.sp
-                            ),modifier = Modifier.align(
-                                TopStart))
-                            Column(modifier = Modifier.align(Center)) {
-                                Text(text = viewModel.bp.value[1], fontSize = 22.sp, textAlign = TextAlign.End, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
-                                Text(text = "Season ${viewModel.bp.value[2]}", modifier = Modifier.align(
-                                    Alignment.End))
-                            }
-                            Image(painter = painterResource(id = R.drawable.bp), contentDescription = null, modifier = Modifier
-                                .align(
-                                    BottomStart
-                                )
-                                .size(80.dp, 42.dp)
-                                .rotate(-5f))
-
-                            Text(
-                                text = if(difTime>0) {"${dayLeft}d ${hourLeft}h ${minLeft}m"} else "ENDED",
-                                style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                    textIndent = TextIndent(0.sp),
-                                    color = if(dayLeft==0L) Color.Red else Color.White
-                                ),
-                                modifier = Modifier
-                                    .background(Color.Gray.copy(alpha = 0.3f))
-                                    .align(
-                                        BottomEnd
-                                    )
-                            )
-                        }
-
-
-                    }
-                }
-            }
-
-            item{
-                Card(
-                    Modifier
-                        .padding(4.dp)
-                        .fillMaxWidth()
-                        .height(250.dp)
-                        .clickable {
-                        },
-
-                    ) {
-                    Box(modifier = Modifier
-                        .fillMaxSize(), contentAlignment = TopEnd){
-
-                        val timeStamp: String = java.lang.String.valueOf(
-                            TimeUnit.MILLISECONDS.toSeconds(
-                                System.currentTimeMillis()
-                            )
-                        )
-                        val currtime : Long = timeStamp.toLong()*1000
-                        val difTime = viewModel.pl.value[0].toLong().minus(currtime)
-                        val dayLeft = difTime/86400000;
-                        val hourLeft = (difTime%86400000)/3600000
-                        val minLeft = ((difTime%86400000)%3600000)/60000
-                        GlideImage(model = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/bpb1.webp?alt=media&token=${viewModel.pl.value[1]}", contentDescription = null,
-                            modifier = Modifier.fillMaxHeight()
-                        ){
-                            it.centerCrop()
-                        }
-                        Box(modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.6f))
-                            .padding(10.dp)){
-                            Text(text = "POWER LEAGUE", style=MaterialTheme.typography.bodyMedium + TextStyle(
-                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                textIndent = TextIndent(0.sp),
-                                fontSize = 20.sp
-                            ),modifier = Modifier.align(
-                                TopStart))
-                            Text(text = "Season ${viewModel.pl.value[1]}", fontWeight = FontWeight.Bold, modifier = Modifier.align(
-                                CenterEnd))
-                            Image(painter = painterResource(id = R.drawable.pl), contentDescription = null, modifier = Modifier
-                                .align(
-                                    BottomStart
-                                )
-                                .size(60.dp)
-                                .rotate(-5f))
-                            Text(
-                                text = if(difTime>0) {"${dayLeft}d ${hourLeft}h ${minLeft}m"} else "ENDED",
-                                style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                    textIndent = TextIndent(0.sp),
-                                    color = if(dayLeft==0L) Color.Red else Color.White
-                                ),
-                                modifier = Modifier
-                                    .background(Color.Gray.copy(alpha = 0.3f))
-                                    .align(
-                                        BottomEnd
-                                    )
-                            )
-                        }
-
-
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.width(3.dp))
         }
-        val iscl = viewModel.cl.value[1] == "cg"
-        if(iscl){
+        Spacer(modifier = Modifier.height(6.dp))
+        Row (Modifier.weight(3.5f)){
+            Spacer(modifier = Modifier.width(6.dp))
+            Card(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .clickable {
+                    },
+
+                ) {
+                Box(modifier = Modifier
+                    .fillMaxSize(), contentAlignment = TopEnd){
+
+                    val timeStamp: String = java.lang.String.valueOf(
+                        TimeUnit.MILLISECONDS.toSeconds(
+                            System.currentTimeMillis()
+                        )
+                    )
+                    val currtime : Long = timeStamp.toLong()*1000
+                    val difTime = viewModel.bp.value[0].toLong().minus(currtime)
+                    val dayLeft = difTime/86400000;
+                    val hourLeft = (difTime%86400000)/3600000
+                    val minLeft = ((difTime%86400000)%3600000)/60000
+                    GlideImage(model = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/bpb.webp?alt=media&token=${viewModel.bp.value[2]}", contentDescription = null,
+                        modifier = Modifier.fillMaxHeight()
+                    ){
+                        it.centerCrop()
+                    }
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.6f))
+                        .padding(10.dp)){
+                        Text(text = "BRAWL PASS", style=MaterialTheme.typography.bodyMedium + TextStyle(
+                            shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                            textIndent = TextIndent(0.sp),
+                            fontSize = 20.sp
+                        ),modifier = Modifier.align(
+                            TopStart))
+                        Column(modifier = Modifier.align(Center)) {
+                            Text(text = viewModel.bp.value[1], fontSize = 22.sp, textAlign = TextAlign.End, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+                            Text(text = "Season ${viewModel.bp.value[2]}", modifier = Modifier.align(
+                                Alignment.End))
+                        }
+                        Image(painter = painterResource(id = R.drawable.bp), contentDescription = null, modifier = Modifier
+                            .align(
+                                BottomStart
+                            )
+                            .size(80.dp, 42.dp)
+                            .rotate(-5f))
+
+                        Text(
+                            text = if(difTime>0) {"${dayLeft}d ${hourLeft}h ${minLeft}m"} else "ENDED",
+                            style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                textIndent = TextIndent(0.sp),
+                                color = if(dayLeft==0L) Color.Red else Color.White
+                            ),
+                            modifier = Modifier
+                                .background(Color.Gray.copy(alpha = 0.3f))
+                                .align(
+                                    BottomEnd
+                                )
+                        )
+                    }
+
+
+                }
+            }
+            Spacer(modifier = Modifier.width(6.dp))
+            Card(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .clickable {
+                    },
+
+                ) {
+                Box(modifier = Modifier
+                    .fillMaxSize(), contentAlignment = TopEnd){
+
+                    val timeStamp: String = java.lang.String.valueOf(
+                        TimeUnit.MILLISECONDS.toSeconds(
+                            System.currentTimeMillis()
+                        )
+                    )
+                    val currtime : Long = timeStamp.toLong()*1000
+                    val difTime = viewModel.pl.value[0].toLong().minus(currtime)
+                    val dayLeft = difTime/86400000;
+                    val hourLeft = (difTime%86400000)/3600000
+                    val minLeft = ((difTime%86400000)%3600000)/60000
+                    GlideImage(model = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/bpb1.webp?alt=media&token=${viewModel.pl.value[1]}", contentDescription = null,
+                        modifier = Modifier.fillMaxHeight()
+                    ){
+                        it.centerCrop()
+                    }
+                    Box(modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.6f))
+                        .padding(10.dp)){
+                        Text(text = "POWER LEAGUE", style=MaterialTheme.typography.bodyMedium + TextStyle(
+                            shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                            textIndent = TextIndent(0.sp),
+                            fontSize = 20.sp
+                        ),modifier = Modifier.align(
+                            TopStart))
+                        Text(text = "Season ${viewModel.pl.value[1]}", fontWeight = FontWeight.Bold, modifier = Modifier.align(
+                            CenterEnd))
+                        Image(painter = painterResource(id = R.drawable.pl), contentDescription = null, modifier = Modifier
+                            .align(
+                                BottomStart
+                            )
+                            .size(60.dp)
+                            .rotate(-5f))
+                        Text(
+                            text = if(difTime>0) {"${dayLeft}d ${hourLeft}h ${minLeft}m"} else "ENDED",
+                            style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                textIndent = TextIndent(0.sp),
+                                color = if(dayLeft==0L) Color.Red else Color.White
+                            ),
+                            modifier = Modifier
+                                .background(Color.Gray.copy(alpha = 0.3f))
+                                .align(
+                                    BottomEnd
+                                )
+                        )
+                    }
+
+
+                }
+            }
+            Spacer(modifier = Modifier.width(6.dp))
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        val iscg = viewModel.cl.value[1] == "cg"
+        if(iscg){
             val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
             val dayLeft = difTime/86400000;
             val hourLeft = (difTime%86400000)/3600000
             val minLeft = ((difTime%86400000)%3600000)/60000
             Card(
                 Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                    .fillMaxSize()
-                    .clickable {
-                    },
+                    .weight(2.2f)
+                    .padding(horizontal = 4.dp)
+                    .clickable {},
 
                 ){
                 Box(){
@@ -752,7 +646,7 @@ fun SetDataMap(
                                         fontSize = 12.sp
                                     )
                                 )
-                                Spacer(modifier = Modifier.height(2.dp))
+                                Spacer(modifier = Modifier.height(3.dp))
                             }
                         }
                         Column(horizontalAlignment = Alignment.End, modifier = Modifier.align(TopEnd)) {
@@ -780,7 +674,7 @@ fun SetDataMap(
             val hourLeft = (difTime%86400000)/3600000
             val minLeft = ((difTime%86400000)%3600000)/60000
 
-            val clEvent = listOf<clubleague>(
+            val clEvent = listOf(
                 clubleague(1,"EVENT DAY 1",0,"Preparation !"),
                 clubleague(2,"EVENT DAY 1",4,"Compete with your club!"),
                 clubleague(3,"EVENT DAY 2",0,"Preparation !"),
@@ -792,11 +686,9 @@ fun SetDataMap(
             val day = 7-dayLeft-1
             Card(
                 Modifier
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                    .fillMaxSize()
-                    .clickable {
-                    },
-
+                    .weight(2.2f)
+                    .padding(horizontal = 6.dp)
+                    .clickable {},
                 ){
                 Box(){
                     Image(painter = painterResource(id = R.drawable.clb), contentDescription = null , modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop )
@@ -844,7 +736,7 @@ fun SetDataMap(
                                         fontSize = 12.sp
                                     )
                                 )
-                                Spacer(modifier = Modifier.height(2.dp))
+                                Spacer(modifier = Modifier.height(3.dp))
                             }
                         }
                         if(clEvent[day.toInt()].ticket!=0){
@@ -878,6 +770,5 @@ fun SetDataMap(
                 }
             }
         }
-
     }
 }

@@ -2,6 +2,7 @@ package com.kal.brawlstatz2.presentation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -79,12 +80,14 @@ fun ShowMetaList(nestedList: List<MetaTier> , sortedMetaList : ArrayList<Brawler
                                 color = sublist.color
 
                             )
-                            Text(
-                                text = "TIER",
-                                fontSize = 8.sp,
-                                fontStyle = FontStyle.Italic,
-                                color = Color.White
-                            )
+                            if(sublist.Tname!="NEW"){
+                                Text(
+                                    text = "TIER",
+                                    fontSize = 8.sp,
+                                    fontStyle = FontStyle.Italic,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }
@@ -196,11 +199,17 @@ fun MetaCard(
                                                         brawler.bname.toString(),
                                                         true
                                                     )
-                                                clicked = if(clicked==1) 0
-                                                else 1
+                                                if(clicked==1&&isVisible){
+                                                    cardModel.mclist.value =
+                                                        ExpandableCardModel(
+                                                            null,
+                                                            false
+                                                        )
+                                                }
+                                                clicked = 1
                                             },
                                     )
-                                    if(clicked==1&&isVisible)
+                                    if(clicked==1&&isVisible&&color!= Color.Cyan)
                                         Canvas(modifier = Modifier.size(20.dp,5.dp), onDraw = {
                                             drawCircle(Color.White,4f)
                                         })
@@ -222,11 +231,17 @@ fun MetaCard(
                                                         brawler.bname.toString(),
                                                         true
                                                     )
-                                                clicked = if(clicked==2) 0
-                                                else 2
+                                                if(clicked==2&&isVisible){
+                                                    cardModel.mclist.value =
+                                                        ExpandableCardModel(
+                                                            null,
+                                                            false
+                                                        )
+                                                }
+                                                clicked = 2
                                             },
                                     )
-                                    if(clicked==2&&isVisible)
+                                    if(clicked==2&&isVisible&&color!= Color.Cyan)
                                         Canvas(modifier = Modifier.size(20.dp,5.dp), onDraw = {
                                             drawCircle(Color.White,4f)
                                         })
@@ -240,21 +255,19 @@ fun MetaCard(
                         }
 
                     }
-                    val t: String
-                    var hide = false
-                    when(clicked){
+                    val t: String = when(clicked){
                         1->{
-                            t = if(brawler.bstarpower.equals("1")) brawler.s1t.toString() else if(brawler.bstarpower.equals("2")) brawler.s2t.toString() else ""
+                            if(brawler.bstarpower.equals("1")) brawler.s1t.toString() else if(brawler.bstarpower.equals("2")) brawler.s2t.toString() else ""
                         }
                         2->{
-                            t = if(brawler.bgadget.equals("1")) brawler.g1t.toString() else if(brawler.bgadget.equals("2")) brawler.g2t.toString() else ""
+                            if(brawler.bgadget.equals("1")) brawler.g1t.toString() else if(brawler.bgadget.equals("2")) brawler.g2t.toString() else ""
                         }
+
                         else -> {
-                            t = ""
-                            hide =true
+                            ""
                         }
                     }
-                    HelperBox2(hide = (!hide)&&isVisible, helperText = t)
+                    HelperBox2(hide = isVisible, helperText = t)
                     if(color!= Color.Cyan) Text(
                         text = "#" + (i + 1).toString(),
                         fontSize = 18.sp,
@@ -276,7 +289,7 @@ fun HelperBox2(
     helperText: String,
     modifier: Modifier=Modifier
 ) {
-    AnimatedVisibility(visible = hide&&helperText!="" , enter = fadeIn()) {
+    AnimatedVisibility(visible = hide&&helperText!="" , enter = fadeIn(), exit = fadeOut()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.7f)

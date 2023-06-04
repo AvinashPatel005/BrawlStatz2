@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,6 +54,7 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.request.RequestListener
 import com.kal.brawlstatz2.R
 import com.kal.brawlstatz2.data.ExpandableCardModel
 import com.kal.brawlstatz2.data.events.Active
@@ -72,7 +74,6 @@ fun Curr(value: List<Active>, viewModel: MainViewModel ,m:Int) {
     LazyColumn(
         Modifier.fillMaxSize()
     ){
-
         items(value){
             MapCard(active = it,cardModel1,viewModel,m){t->
                 enlarged=t
@@ -94,9 +95,7 @@ fun Curr(value: List<Active>, viewModel: MainViewModel ,m:Int) {
             contentAlignment = Alignment.Center
         ) {
             Card() {
-
                 GlideImage(model = enlarged, contentDescription = null, Modifier.clickable {})
-
             }
         }
     }
@@ -197,7 +196,9 @@ fun MapCard(
                         val dayLeft = difTime/86400000;
                         val hourLeft = (difTime%86400000)/3600000
                         val minLeft = ((difTime%86400000)%3600000)/60000
-                        Row(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                             ImageAsync2(string = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/traits%2Fsupertime.png?alt=media")
 
                             Text(text = "${dayLeft}d ${hourLeft}h ${minLeft}m" , style=MaterialTheme.typography.bodyMedium + TextStyle(
@@ -217,7 +218,9 @@ fun MapCard(
                     Row() {
                         GlideImage(model = active.map.imageUrl, contentDescription = null, modifier = Modifier.clickable{
                             onclick(active.map.imageUrl)
-                        })
+                        }){
+                            it.placeholder(R.drawable.mapthumbnail)
+                        }
                         Box(modifier = Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(), contentAlignment = Alignment.Center){

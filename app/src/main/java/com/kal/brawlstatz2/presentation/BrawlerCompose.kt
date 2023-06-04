@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -41,16 +42,84 @@ import com.kal.brawlstatz2.viewmodel.MainViewModel
 @Composable
 fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainViewModel) {
     val cardModel = viewModel<CardsViewModel>()
+    var selectedSort by remember {
+        mutableStateOf(0)
+    }
     if (isSearching && brawler.isNotEmpty()) cardModel.c1list.value =
         ExpandableCardModel(brawler[0].bname, true)
     else cardModel.c1list.value = ExpandableCardModel(null, false)
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(brawler) {
-            BrawlerCard(brawler = it, cardModel,viewModel)
+    Column() {
+        LazyRow(
+            modifier = Modifier
+                .background(Color(0xFF000000))
+                .height(40.dp)
+        ) {
+            val list = listOf(
+                "All",
+                "Traits",
+                "Chromatic",
+                "Legendary",
+                "Mythic",
+                "Epic",
+                "Super Rare",
+                "Rare",
+                "Starting"
+            )
+            items(list) { s ->
+                Spacer(modifier = Modifier.width(10.dp))
+                Button(
+                    modifier = if (s == "Traits") {
+                        Modifier
+                            .border(
+                                width = 2.dp,
+                                color = Color.Gray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .height(35.dp)
+                    } else {
+                        Modifier.height(35.dp)
+                    },
+                    onClick = {
+                        if (selectedSort == list.indexOf(s) && selectedSort != 0) {
+                            selectedSort = 0
+                            viewModel.find("")
+                        } else {
+                            selectedSort = list.indexOf(s)
+                            if (s == "All") viewModel.find("")
+                            else viewModel.find(s.lowercase())
+                        }
+                    },
+                    colors = if (selectedSort == list.indexOf(s)) ButtonDefaults.buttonColors(
+                        Color(0xffeeeee4)
+                    ) else ButtonDefaults.buttonColors(
+                        Color(
+                            0xFF202124
+                        )
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
+                    Text(
+                        text = s,
+                        color = if (selectedSort != list.indexOf(s)) Color(
+                            0xffeeeee4
+                        ) else Color(0xFF202124)
+                    )
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(brawler) {
+                BrawlerCard(brawler = it, cardModel,viewModel)
+            }
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
