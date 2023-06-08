@@ -327,8 +327,8 @@ fun HelperBox3(
 
             Box(
                 modifier = modifier
-                    .border(1.dp, Color.White, RoundedCornerShape(10.dp))
-                    .clip(RoundedCornerShape(10.dp))
+                    .border(1.dp, Color.White, RoundedCornerShape(6.dp))
+                    .clip(RoundedCornerShape(6.dp))
                     .background(Color.White)
                     .padding(horizontal = 2.dp)
             ) {

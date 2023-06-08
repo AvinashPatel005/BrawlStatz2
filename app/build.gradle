@@ -20,8 +20,8 @@ android {
         applicationId "com.kal.brawlstatz2"
         minSdk 24
         targetSdk 33
-        versionCode 35
-        versionName "4.6"
+        versionCode 36
+        versionName "4.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -79,4 +79,5 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
     implementation "com.google.code.gson:gson:2.10.1"
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

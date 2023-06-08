@@ -1,27 +1,17 @@
 package com.kal.brawlstatz2
 
 import android.app.Activity
-import android.content.ContentValues.TAG
-import android.content.Context.LOCATION_SERVICE
-import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -50,22 +40,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -79,16 +64,18 @@ import com.kal.brawlstatz2.data.clubleague
 import com.kal.brawlstatz2.presentation.BrawlersList
 import com.kal.brawlstatz2.presentation.Curr
 import com.kal.brawlstatz2.presentation.ShimmerListItem
+import com.kal.brawlstatz2.presentation.ShimmerListItem1
+import com.kal.brawlstatz2.presentation.ShimmerListItem2
 import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 
-
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
             BrawlStatz2Theme {
@@ -108,10 +95,6 @@ class MainActivity : ComponentActivity() {
                     var tabCurrent by remember{
                         mutableStateOf("brawler")
                     }
-
-                var selectedSortMeta by remember {
-                    mutableStateOf(0)
-                }
 
                     val focusManager = LocalFocusManager.current
                     val navController = rememberNavController()
@@ -245,13 +228,11 @@ class MainActivity : ComponentActivity() {
                                 items = listOf(
                                     BottomNavItem("BRAWLER","brawler", Icons.Default.Home),
                                     BottomNavItem("EVENTS","events", Icons.Default.Notifications),
-                                    BottomNavItem("META","meta", Icons.Default.Settings)
+                                    BottomNavItem("META","meta",Icons.Default.Face)
                                 ),
                                 navController = navController,
                                 onItemClicked = {
                                     tabCurrent=it.route
-                                    //selectedSort=0
-                                    selectedSortMeta=0
                                     isSearch=false
                                     value = ""
                                     viewModel.isSearching.value=false
@@ -293,7 +274,7 @@ class MainActivity : ComponentActivity() {
         NavHost(navController = navController, startDestination = "brawler" ){
             composable("brawler"){
                 if(isLoading){
-                   Column() {
+                   Column {
                        Spacer(modifier = Modifier.height(40.dp))
                        LazyColumn(modifier = Modifier.fillMaxSize()){
                            items(10){
@@ -310,19 +291,35 @@ class MainActivity : ComponentActivity() {
                 BrawlersList(brawler = brawlers,isSearching,viewModel)
             }
             composable("events"){
-                val navController1 = rememberNavController()
-                NavHost(navController = navController1, startDestination = "menu") {
-                    composable("menu") { SetDataMap(viewModel){route->
-                        navController1.navigate(route = route)
-                    } }
-                    composable("curr") {Curr(viewModel.activeList.value,viewModel,0) }
-                    composable("up") { Curr(viewModel.upcomingList.value,viewModel,1) }
+                if(isLoading){
+                    ShimmerListItem1()
                 }
-
-
-
+                else{
+                    val navController1 = rememberNavController()
+                    NavHost(navController = navController1, startDestination = "menu") {
+                        composable("menu") { SetDataMap(viewModel){route->
+                            navController1.navigate(route = route)
+                        } }
+                        composable("curr") {Curr(viewModel.activeList.value,viewModel,0) }
+                        composable("up") { Curr(viewModel.upcomingList.value,viewModel,1) }
+                    }
+                }
             }
             composable("meta"){
+                if(isLoading){
+                    Column {
+                        LazyColumn(modifier = Modifier.fillMaxSize()){
+                            items(10){
+                                ShimmerListItem2(
+                                    modifier = Modifier
+                                        .background(Color.Black)
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
                 ShowMetaList(meta,viewModel.sortedMetaList)
             }
         }
@@ -410,7 +407,7 @@ fun SetDataMap(
     viewModel: MainViewModel,
     onclick: (String) -> Unit
 ) {
-    val eventCardList = listOf<Events>(
+    val eventCardList = listOf(
         Events("CURRENT","curr", Color.Green,R.drawable.c1,true),
         Events("UPCOMING","up", Color.Blue,R.drawable.c2,true)
     )
@@ -473,7 +470,7 @@ fun SetDataMap(
                     )
                     val currtime : Long = timeStamp.toLong()*1000
                     val difTime = viewModel.bp.value[0].toLong().minus(currtime)
-                    val dayLeft = difTime/86400000;
+                    val dayLeft = difTime/86400000
                     val hourLeft = (difTime%86400000)/3600000
                     val minLeft = ((difTime%86400000)%3600000)/60000
                     GlideImage(model = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/bpb.webp?alt=media&token=${viewModel.bp.value[2]}", contentDescription = null,
@@ -540,7 +537,7 @@ fun SetDataMap(
                     )
                     val currtime : Long = timeStamp.toLong()*1000
                     val difTime = viewModel.pl.value[0].toLong().minus(currtime)
-                    val dayLeft = difTime/86400000;
+                    val dayLeft = difTime/86400000
                     val hourLeft = (difTime%86400000)/3600000
                     val minLeft = ((difTime%86400000)%3600000)/60000
                     GlideImage(model = "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/bpb1.webp?alt=media&token=${viewModel.pl.value[1]}", contentDescription = null,
@@ -590,7 +587,7 @@ fun SetDataMap(
         val iscg = viewModel.cl.value[1] == "cg"
         if(iscg){
             val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
-            val dayLeft = difTime/86400000;
+            val dayLeft = difTime/86400000
             val hourLeft = (difTime%86400000)/3600000
             val minLeft = ((difTime%86400000)%3600000)/60000
             Card(
@@ -600,7 +597,7 @@ fun SetDataMap(
                     .clickable {},
 
                 ){
-                Box(){
+                Box{
                     Image(painter = painterResource(id = R.drawable.clb), contentDescription = null , modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop )
                     Box(modifier = Modifier
                         .fillMaxSize()
@@ -670,7 +667,7 @@ fun SetDataMap(
         }
         else{
             val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
-            val dayLeft = difTime/86400000;
+            val dayLeft = difTime/86400000
             val hourLeft = (difTime%86400000)/3600000
             val minLeft = ((difTime%86400000)%3600000)/60000
 
@@ -690,7 +687,7 @@ fun SetDataMap(
                     .padding(horizontal = 6.dp)
                     .clickable {},
                 ){
-                Box(){
+                Box{
                     Image(painter = painterResource(id = R.drawable.clb), contentDescription = null , modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop )
                     Box(modifier = Modifier
                         .fillMaxSize()

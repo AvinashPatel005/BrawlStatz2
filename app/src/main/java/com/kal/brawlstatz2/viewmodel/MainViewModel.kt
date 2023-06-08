@@ -2,6 +2,7 @@ package com.kal.brawlstatz2.viewmodel
 import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
@@ -57,8 +58,8 @@ class MainViewModel : ViewModel() {
     val pl: MutableState<List<String>> = mutableStateOf(listOf())
     val _cl :ArrayList<String> = ArrayList()
     val cl: MutableState<List<String>> = mutableStateOf(listOf())
-    var timeFromServer : MutableState<Long> = mutableStateOf(0)
-    var metaVer : MutableState<String> = mutableStateOf("")
+    var timeFromServer : MutableState<Long> = mutableLongStateOf(0)
+    var metaVer : MutableState<Long> = mutableLongStateOf(0)
     init {
         appUpdater()
         fetchData()
@@ -116,7 +117,7 @@ class MainViewModel : ViewModel() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 _bp.clear()
                 _pl.clear()
-                metaVer.value = snapshot.child("metaVersion").value as String
+                metaVer.value = snapshot.child("metaVersion").value as Long
                _bp.add(snapshot.child("brawlpass/enddate").value.toString())
                 _bp.add(snapshot.child("brawlpass/name").value as String)
                 _bp.add(snapshot.child("brawlpass/season").value.toString())
