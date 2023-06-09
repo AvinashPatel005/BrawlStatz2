@@ -36,6 +36,10 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+private val LightTheme = lightColorScheme(
+    
+)
+
 
 @Composable
 fun BrawlStatz2Theme(

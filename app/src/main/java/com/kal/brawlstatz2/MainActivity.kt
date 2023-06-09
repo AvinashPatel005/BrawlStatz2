@@ -1,7 +1,9 @@
 package com.kal.brawlstatz2
 
 import android.app.Activity
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -98,14 +100,22 @@ class MainActivity : ComponentActivity() {
 
                     val focusManager = LocalFocusManager.current
                     val navController = rememberNavController()
-                navController.enableOnBackPressed(enabled = false)
+
+                LaunchedEffect(key1 = true){
+                    navController.enableOnBackPressed(false)
+                }
+
                 val activity = (LocalContext.current as? Activity)
                 BackHandler {
-                    if(navController.currentDestination?.route  == "brawler") activity?.finish()
+                    if(navController.currentDestination?.route  == "brawler"){
+                        activity?.finish()
+                        Log.d(TAG, "Finished")
+                    }
                     else {
                         navController.navigate("brawler")
                         tabCurrent="brawler"
                         isSearch=false
+                        Log.d(TAG, "back")
                     }
                 }
                     LaunchedEffect(key1 = isVisible, key2 = isSearch){
