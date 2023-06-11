@@ -66,7 +66,7 @@ fun ShowMetaList(nestedList: List<MetaTier> , sortedMetaList : ArrayList<Brawler
                         .fillMaxWidth()
                         .padding(start = 2.dp, end = 2.dp, top = 2.dp)
                         .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
-                        color = Color(0xFF111010),
+                        color = MaterialTheme.colorScheme.primary,
                     ){
                         Row(
                             Modifier
@@ -85,7 +85,7 @@ fun ShowMetaList(nestedList: List<MetaTier> , sortedMetaList : ArrayList<Brawler
                                     text = "TIER",
                                     fontSize = 8.sp,
                                     fontStyle = FontStyle.Italic,
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
                         }
@@ -108,7 +108,7 @@ fun ShowMetaList(nestedList: List<MetaTier> , sortedMetaList : ArrayList<Brawler
                         .padding(start = 2.dp, end = 2.dp, bottom = 2.dp)
                         .height(10.dp)
                         .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp)),
-                        color = Color(0xFF111010),
+                        color = MaterialTheme.colorScheme.primary,
                     ){
 
                     }
@@ -128,7 +128,7 @@ fun MetaCard(
     val cardHeight : Dp = 86.dp
     val isVisible = (cardModel.mclist.value.isExpanded && cardModel.mclist.value.id == brawler.bname)
     var clicked by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
     Surface(
         modifier = Modifier
@@ -142,7 +142,7 @@ fun MetaCard(
                 .fillMaxWidth()
                 .padding(start = 2.dp, end = 2.dp)
                 .height(cardHeight),
-            color = Color(0xFF111010)
+            color = MaterialTheme.colorScheme.primary
         ) {
             Box(
                 modifier = Modifier
@@ -272,7 +272,7 @@ fun MetaCard(
                         text = "#" + (i + 1).toString(),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         style = TextStyle(
                             shadow = Shadow(offset = Offset(4f, 1f), blurRadius = 1f)
                         ),

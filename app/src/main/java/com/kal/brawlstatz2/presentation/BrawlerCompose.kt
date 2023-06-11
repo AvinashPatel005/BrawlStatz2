@@ -44,7 +44,7 @@ import com.kal.brawlstatz2.viewmodel.MainViewModel
 fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainViewModel) {
     val cardModel = viewModel<CardsViewModel>()
     var selectedSort by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
     if (isSearching && brawler.isNotEmpty()) cardModel.c1list.value =
         ExpandableCardModel(brawler[0].bname, true)
@@ -52,7 +52,7 @@ fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainVi
     Column() {
         LazyRow(
             modifier = Modifier
-                .background(Color(0xFF000000))
+                .background(MaterialTheme.colorScheme.background)
                 .height(40.dp)
         ) {
             val list = listOf(
@@ -91,20 +91,18 @@ fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainVi
                         }
                     },
                     colors = if (selectedSort == list.indexOf(s)) ButtonDefaults.buttonColors(
-                        Color(0xffeeeee4)
+                        MaterialTheme.colorScheme.onTertiaryContainer
                     ) else ButtonDefaults.buttonColors(
-                        Color(
-                            0xFF202124
-                        )
+                        MaterialTheme.colorScheme.primaryContainer
                     ),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(8.dp)
                 ) {
                     Text(
                         text = s,
-                        color = if (selectedSort != list.indexOf(s)) Color(
-                            0xffeeeee4
-                        ) else Color(0xFF202124)
+                        color = if (selectedSort != list.indexOf(s)) MaterialTheme.colorScheme.onBackground
+                        else MaterialTheme.colorScheme.primaryContainer,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -142,7 +140,7 @@ fun BrawlerCard(
             .border(width = 2.dp, color = brawler.color, shape = RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(12.dp)),
         elevation = CardDefaults.cardElevation(10.dp),
-        colors = CardDefaults.cardColors(Color(0xFF111010)),
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primary),
         onClick = {
             if (isExp) cardModel.c1list.value = ExpandableCardModel(cardId, false)
             else cardModel.c1list.value = ExpandableCardModel(cardId, true)
@@ -178,7 +176,7 @@ fun BrawlerCard(
                             Text(
                                 text = brawler.bname.toString(),
                                 fontSize = 19.sp,
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontWeight = FontWeight.Bold,
                                 style = TextStyle(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f),
@@ -195,7 +193,7 @@ fun BrawlerCard(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f)
                                 )
                             )
-                            val activity = (LocalContext.current as? Activity)
+
                             if(brawler.trait!="null") {
                                 Spacer(modifier = Modifier.height(2.dp))
                                 ImageAsync2(string = brawler.trait.toString(), modifier = Modifier
@@ -243,14 +241,14 @@ fun BrawlerCard(
                     ){
                         Column {
                             var clicked by remember {
-                                mutableStateOf(0)
+                                mutableIntStateOf(0)
                             }
                             Text(text = "ABOUT", fontSize = 10.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 35.dp), style = TextStyle(
                                 textIndent = TextIndent(0.sp),
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onPrimary
                             ))
                             Box(modifier = Modifier
-                                .border(1.dp, Color.White, RoundedCornerShape(10.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.onSecondary, RoundedCornerShape(10.dp))
                                 .clip(RoundedCornerShape(10.dp))
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp, horizontal = 4.dp)
@@ -262,7 +260,7 @@ fun BrawlerCard(
                                     style = TextStyle(
                                         textIndent = TextIndent(0.sp),
                                         textAlign = TextAlign.Center,
-                                        color = Color.White
+                                        color = MaterialTheme.colorScheme.onPrimary
                                     ),
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -472,7 +470,7 @@ fun BarPreview(
                             bottomEnd = 4.dp
                         )
                     )
-                    .background(Color(0xff262626))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .clickable {
                         onClick()
                     }
@@ -494,7 +492,7 @@ fun BarPreview(
             Text(
                 moveName.uppercase(),
                 fontSize = 14.sp,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.offset(y = (-4).dp)
@@ -529,8 +527,7 @@ fun CounterColumn(url: String, name: String, placeholder: Int, isExp: Boolean) {
             fontSize = 8.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.width(43.dp),
-            color = Color.White,
-            fontStyle = FontStyle.Italic
+            color = MaterialTheme.colorScheme.onSecondary
         )
     }
 }

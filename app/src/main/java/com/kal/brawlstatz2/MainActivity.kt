@@ -2,18 +2,23 @@ package com.kal.brawlstatz2
 
 import android.app.Activity
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -32,9 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
@@ -73,6 +80,7 @@ import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
+import kotlin.math.log
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +88,25 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
-            BrawlStatz2Theme {
+
+            val activity = (LocalContext.current as? Activity)
+            val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
+            val theme = sharedPref?.getInt("theme",0)
+            var themeMode by remember {
+                if (theme != null) {
+                    mutableIntStateOf(theme)
+                }
+                else mutableIntStateOf(0)
+            }
+            if (sharedPref != null) {
+                with (sharedPref.edit()) {
+                    putInt("theme",themeMode)
+                    apply()
+                }
+            }
+
+
+            AppTheme(themeMode){
                 val viewModel = viewModel<MainViewModel>()
                     var isSearch by remember {
                         mutableStateOf(false)
@@ -105,18 +131,23 @@ class MainActivity : ComponentActivity() {
                     navController.enableOnBackPressed(false)
                 }
 
-                val activity = (LocalContext.current as? Activity)
+
+
                 BackHandler {
                     if(navController.currentDestination?.route  == "brawler"){
                         activity?.finish()
-                        Log.d(TAG, "Finished")
                     }
                     else {
                         navController.navigate("brawler")
                         tabCurrent="brawler"
                         isSearch=false
-                        Log.d(TAG, "back")
                     }
+                }
+                var fabExpanded by remember{
+                    mutableStateOf(false)
+                }
+                var themeChanger by remember{
+                    mutableStateOf(false)
                 }
                     LaunchedEffect(key1 = isVisible, key2 = isSearch){
                         if(isVisible&&isSearch){
@@ -140,12 +171,12 @@ class MainActivity : ComponentActivity() {
                                                      "BrawlStatz2",
                                                      maxLines = 1,
                                                      overflow = TextOverflow.Ellipsis,
-                                                     color = Color(0xFFd2d4d2),
+                                                     color = MaterialTheme.colorScheme.onBackground,
                                                      fontWeight = FontWeight.Bold,
                                                  )
                                              }
                                          },
-                                         colors = TopAppBarDefaults.topAppBarColors(Color(0xFF000000)),
+                                         colors = TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.background),
                                          navigationIcon = {
                                              Icon(
                                                  painter = painterResource(id = R.drawable.logo_menu),
@@ -154,7 +185,7 @@ class MainActivity : ComponentActivity() {
                                                      start = 10.dp,
                                                      end = 4.dp
                                                  ),
-                                                 tint = Color.White
+                                                 tint = MaterialTheme.colorScheme.onBackground
                                              )
                                          },
 
@@ -166,13 +197,13 @@ class MainActivity : ComponentActivity() {
                                                  if (tabCurrent == "events") {
                                                      Text(
                                                          text = "EVENTS    ",
-                                                         color = Color.Gray,
+                                                         color = MaterialTheme.colorScheme.onSecondary,
                                                          fontSize = 9.sp
                                                      )
                                                  } else if (tabCurrent == "meta") {
                                                      Text(
-                                                         text = "V${viewModel.metaVer.value} ",
-                                                         color = Color.Gray,
+                                                         text = "V${viewModel.metaVer.value}   ",
+                                                         color = MaterialTheme.colorScheme.onSecondary,
                                                          fontSize = 9.sp
                                                      )
                                                  }
@@ -194,20 +225,20 @@ class MainActivity : ComponentActivity() {
                                                              .focusRequester(focusRequester)
                                                              .scale(scaleY = 0.9F, scaleX = 1F),
 
-                                                         placeholder = { Text(text = "Search") },
+                                                         placeholder = { Text(text = " Search", color = MaterialTheme.colorScheme.onTertiaryContainer) },
                                                          shape = RoundedCornerShape(100),
                                                          colors = OutlinedTextFieldDefaults.colors(
-                                                             focusedContainerColor = PurpleGrey40,
-                                                             unfocusedContainerColor = PurpleGrey40,
-                                                             disabledContainerColor = PurpleGrey40,
-                                                             focusedBorderColor = Color.Black,
-                                                             unfocusedBorderColor = Color.Black,
-                                                             cursorColor = PurpleGrey80
+                                                             focusedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                             unfocusedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                             disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                             focusedBorderColor = MaterialTheme.colorScheme.background,
+                                                             unfocusedBorderColor = MaterialTheme.colorScheme.background,
+                                                             cursorColor = MaterialTheme.colorScheme.onTertiaryContainer
                                                          )
                                                      )
                                                  }
                                                  Card(
-                                                     modifier = Modifier.clip(RoundedCornerShape(100))
+                                                     modifier = Modifier.clip(RoundedCornerShape(100)), colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
                                                  ) {
                                                      if (tabCurrent == "brawler") {
                                                          IconButton(onClick = {
@@ -232,6 +263,62 @@ class MainActivity : ComponentActivity() {
                                          }
                                      )
                                  }
+                        },
+
+                        floatingActionButton = {if(tabCurrent!="events") {
+                                               Column(horizontalAlignment = Alignment.End) {
+                                                   AnimatedVisibility(visible = fabExpanded ) {
+                                                       Row(verticalAlignment = Alignment.CenterVertically){
+                                                           Text(text = "Soon   ",
+                                                               style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                                                   shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                                                   textIndent = TextIndent(0.sp),
+                                                                   fontSize = 20.sp
+                                                               ),
+                                                               color = Color.White)
+                                                           FloatingActionButton(onClick = { /*TODO*/ }, containerColor = MaterialTheme.colorScheme.tertiaryContainer, shape = CircleShape, modifier = Modifier.size(60.dp)) {
+                                                               Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+                                                           }
+                                                       }
+
+                                                   }
+                                                   Spacer(modifier = Modifier.height(6.dp))
+                                                   AnimatedVisibility(visible = fabExpanded ) {
+
+                                                       Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                                                           Text(text = "Theme ",
+                                                               style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                                                   shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
+                                                                   textIndent = TextIndent(0.sp),
+                                                                   fontSize = 20.sp
+                                                               ),
+                                                               color = Color.White)
+                                                           FloatingActionButton(onClick = {
+                                                                                          fabExpanded=!fabExpanded
+                                                               themeChanger=true
+
+                                                           }, containerColor = MaterialTheme.colorScheme.tertiaryContainer, shape = CircleShape, modifier = Modifier.size(60.dp)) {
+                                                               Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
+                                                           }
+                                                       }
+                                                   }
+                                                   Spacer(modifier = Modifier.height(6.dp))
+
+                                                       Log.d(TAG, "onCreate: tb")
+                                                       FloatingActionButton(onClick = { fabExpanded=!fabExpanded },
+                                                           containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                           shape = RoundedCornerShape(20.dp), modifier = Modifier.size(60.dp)
+                                                       ) {
+                                                           var angle = animateFloatAsState(
+                                                               targetValue = if (fabExpanded) 1.0F else 0F,
+                                                               animationSpec = tween(durationMillis = 1000)
+                                                           )
+
+                                                           Icon(imageVector = Icons.Default.Add , contentDescription = null, modifier = Modifier.rotate(135*angle.value))
+                                                       }
+                                                   }
+
+                                               }
                         },
                         bottomBar = {
                             BottomNavBar(
@@ -259,7 +346,7 @@ class MainActivity : ComponentActivity() {
                                     top = it.calculateTopPadding(),
                                     bottom = it.calculateBottomPadding()
                                 )
-                                .background(Color(0xFF000000))
+                                .background(MaterialTheme.colorScheme.background)
                         )
                         {
                                 Navigation(navController = navController)
@@ -267,6 +354,67 @@ class MainActivity : ComponentActivity() {
 
                             if(viewModel.isUpdateAvailable.value){
                                 Update(viewModel)
+                            }
+                            if(themeChanger){
+                                AlertDialog(onDismissRequest = { themeChanger=false }) {
+                                    Box(modifier = Modifier
+                                        .clip(
+                                            RoundedCornerShape(20.dp)
+                                        )
+                                        .background(
+                                            MaterialTheme.colorScheme.tertiaryContainer
+                                        )
+                                        .fillMaxWidth()
+                                        .padding(20.dp)
+
+                                        ){
+                                        Column {
+                                            Text(text = "Choose theme", fontWeight = FontWeight.ExtraBold, fontSize = 25.sp)
+                                            Spacer(modifier = Modifier.height(5.dp))
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        themeChanger = false
+                                                        themeMode = 0
+                                                    }
+                                            ){
+                                                    Text(text = "Dark", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                                if(themeMode==0) Icon(Icons.Default.Check, contentDescription = null)
+                                            }
+                                            Spacer(modifier = Modifier.height(5.dp))
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        themeChanger = false
+                                                        themeMode = 1
+                                                    }
+                                            ){
+                                                    Text(text = "Light", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                                if(themeMode==1) Icon(Icons.Default.Check, contentDescription = null)
+                                            }
+                                            Spacer(modifier = Modifier.height(5.dp))
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        themeChanger = false
+                                                        themeMode = 2
+                                                    }
+                                            ){
+                                                    Text(text = "Dynamic", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                                if(themeMode==2)Icon(Icons.Default.Check, contentDescription = null)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -290,7 +438,7 @@ class MainActivity : ComponentActivity() {
                            items(10){
                                ShimmerListItem(
                                    modifier = Modifier
-                                       .background(Color.Black)
+                                       .background(MaterialTheme.colorScheme.background)
                                        .fillMaxWidth()
                                        .padding(16.dp)
                                )
@@ -322,7 +470,7 @@ class MainActivity : ComponentActivity() {
                             items(10){
                                 ShimmerListItem2(
                                     modifier = Modifier
-                                        .background(Color.Black)
+                                        .background(MaterialTheme.colorScheme.background)
                                         .fillMaxWidth()
                                         .padding(16.dp)
                                 )
@@ -387,10 +535,11 @@ fun BottomNavBar(
     val backStackEntry = navController.currentBackStackEntryAsState()
     NavigationBar(
         modifier = Modifier.height(50.dp),
-        tonalElevation = 1000.dp,
+        tonalElevation = 1.dp,
+        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
     ){
        Column {
-           Divider()
+           Divider(color = MaterialTheme.colorScheme.primaryContainer)
            Row{
                items.forEach{
                    val selected = it.route == backStackEntry.value?.destination?.route
@@ -404,7 +553,8 @@ fun BottomNavBar(
                                Icon(imageVector = it.icon, contentDescription = it.name, modifier = Modifier.size(20.dp))
                                if(selected) Text(text = it.name, textAlign = TextAlign.Center, fontSize = 8.sp)
                            }
-                       }
+                       },
+                       colors = NavigationBarItemDefaults.colors(selectedIconColor = MaterialTheme.colorScheme.onTertiaryContainer, unselectedIconColor = MaterialTheme.colorScheme.onTertiaryContainer, indicatorColor = MaterialTheme.colorScheme.tertiaryContainer)
                    )
                }
            }
@@ -451,6 +601,7 @@ fun SetDataMap(
                                     textIndent = TextIndent(0.sp),
                                     fontSize = 20.sp
                                 ),
+                                color = Color.White
                             )
                         }
                     }
@@ -496,11 +647,12 @@ fun SetDataMap(
                             shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                             textIndent = TextIndent(0.sp),
                             fontSize = 20.sp
-                        ),modifier = Modifier.align(
+                        ),color=Color.White
+                            ,modifier = Modifier.align(
                             TopStart))
                         Column(modifier = Modifier.align(Center)) {
-                            Text(text = viewModel.bp.value[1], fontSize = 22.sp, textAlign = TextAlign.End, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
-                            Text(text = "Season ${viewModel.bp.value[2]}", modifier = Modifier.align(
+                            Text(text = viewModel.bp.value[1], fontSize = 22.sp, textAlign = TextAlign.End,color=Color.White, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+                            Text(text = "Season ${viewModel.bp.value[2]}",color=Color.White, modifier = Modifier.align(
                                 Alignment.End))
                         }
                         Image(painter = painterResource(id = R.drawable.bp), contentDescription = null, modifier = Modifier
@@ -559,13 +711,13 @@ fun SetDataMap(
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.6f))
                         .padding(10.dp)){
-                        Text(text = "POWER LEAGUE", style=MaterialTheme.typography.bodyMedium + TextStyle(
+                        Text(text = "POWER LEAGUE",color=Color.White, style=MaterialTheme.typography.bodyMedium + TextStyle(
                             shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                             textIndent = TextIndent(0.sp),
                             fontSize = 20.sp
                         ),modifier = Modifier.align(
                             TopStart))
-                        Text(text = "Season ${viewModel.pl.value[1]}", fontWeight = FontWeight.Bold, modifier = Modifier.align(
+                        Text(text = "Season ${viewModel.pl.value[1]}",color=Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.align(
                             CenterEnd))
                         Image(painter = painterResource(id = R.drawable.pl), contentDescription = null, modifier = Modifier
                             .align(
@@ -613,7 +765,7 @@ fun SetDataMap(
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.7f))
                         .padding(10.dp)) {
-                            Text(text =  "CLUB GAMES",style=MaterialTheme.typography.bodyMedium + TextStyle(
+                            Text(text =  "CLUB GAMES",color=Color.White,style=MaterialTheme.typography.bodyMedium + TextStyle(
                                 shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                 textIndent = TextIndent(0.sp),
                                 fontSize = 20.sp
@@ -640,13 +792,13 @@ fun SetDataMap(
                                 .size(68.dp))
                             Spacer(modifier = Modifier.width(10.dp))
                             Column(modifier = Modifier.align(Bottom)) {
-                                Text("QUEST WEEK",
+                                Text("QUEST WEEK",color=Color.White,
                                     style = MaterialTheme.typography.bodyMedium + TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                         textIndent = TextIndent(0.sp),
                                         fontSize = 18.sp
                                     ), modifier = Modifier.offset(y=(4).dp))
-                                Text("Complete quests with your club!",
+                                Text("Complete quests with your club!",color=Color.White,
                                     style = MaterialTheme.typography.bodyMedium + TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                         textIndent = TextIndent(0.sp),
@@ -657,7 +809,7 @@ fun SetDataMap(
                             }
                         }
                         Column(horizontalAlignment = Alignment.End, modifier = Modifier.align(TopEnd)) {
-                            Text(text = " Club League in",
+                            Text(text = " Club League in",color=Color.White,
                                 style = MaterialTheme.typography.bodyMedium + TextStyle(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                     textIndent = TextIndent(0.sp),
@@ -703,7 +855,7 @@ fun SetDataMap(
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.7f))
                         .padding(10.dp)) {
-                        Text(text =  "CLUB LEAGUE",style=MaterialTheme.typography.bodyMedium + TextStyle(
+                        Text(text =  "CLUB LEAGUE",color=Color.White,style=MaterialTheme.typography.bodyMedium + TextStyle(
                             shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                             textIndent = TextIndent(0.sp),
                             fontSize = 20.sp
@@ -730,13 +882,13 @@ fun SetDataMap(
                                 .size(68.dp))
                             Spacer(modifier = Modifier.width(10.dp))
                             Column(modifier = Modifier.align(Bottom)) {
-                                Text(clEvent[day.toInt()].name,
+                                Text(clEvent[day.toInt()].name,color=Color.White,
                                     style = MaterialTheme.typography.bodyMedium + TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                         textIndent = TextIndent(0.sp),
                                         fontSize = 18.sp
                                     ), modifier = Modifier.offset(y=(4).dp))
-                                Text(clEvent[day.toInt()].text,
+                                Text(clEvent[day.toInt()].text,color=Color.White,
                                     style = MaterialTheme.typography.bodyMedium + TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                         textIndent = TextIndent(0.sp),
@@ -750,7 +902,7 @@ fun SetDataMap(
                             Row (verticalAlignment = Alignment.CenterVertically,modifier = Modifier.align(CenterEnd)){
                                 Image(painter = painterResource(id = R.drawable.ct), contentDescription = null, modifier = Modifier
                                     .size(30.dp))
-                                Text(text = " x${clEvent[day.toInt()].ticket}",
+                                Text(text = " x${clEvent[day.toInt()].ticket}",color=Color.White,
                                     style = MaterialTheme.typography.bodyMedium + TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                         textIndent = TextIndent(0.sp),
@@ -759,7 +911,7 @@ fun SetDataMap(
                             }
                         }
                         Column(horizontalAlignment = Alignment.End, modifier = Modifier.align(TopEnd)) {
-                            Text(text = " Club Games in",
+                            Text(text = " Club Games in",color=Color.White,
                                 style = MaterialTheme.typography.bodyMedium + TextStyle(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                     textIndent = TextIndent(0.sp),

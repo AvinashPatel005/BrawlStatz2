@@ -150,13 +150,13 @@ fun MapCard(
                                     Modifier
                                         .height(22.dp)
                                         .offset(y = (-4).dp), contentAlignment = Alignment.BottomCenter){
-                                    Text(text = active.map.gameMode.name,textAlign = TextAlign.Center , fontSize = 20.sp, style = MaterialTheme.typography.bodyMedium+ TextStyle(
+                                    Text(text = active.map.gameMode.name,textAlign = TextAlign.Center , color = Color.White, fontSize = 20.sp, style = MaterialTheme.typography.bodyMedium+ TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f),
                                         textIndent = TextIndent(0.sp)
                                     )
                                     )
                                 }
-                                Text(text = active.map.name+" ", textAlign = TextAlign.Center ,fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium+ TextStyle(
+                                Text(text = active.map.name+" ", textAlign = TextAlign.Center , color = Color.White,fontSize = 14.sp, style = MaterialTheme.typography.bodyMedium+ TextStyle(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 1f),
                                     textIndent = TextIndent(0.sp)
                                 ),modifier = Modifier
@@ -204,7 +204,7 @@ fun MapCard(
                             Text(text = "${dayLeft}d ${hourLeft}h ${minLeft}m" , style=MaterialTheme.typography.bodyMedium + TextStyle(
                                 shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                 textIndent = TextIndent(0.sp),
-                            ),modifier=Modifier.background(Color.Gray.copy(alpha = 0.4f)))
+                            ), color = Color.White,modifier=Modifier.background(Color.Gray.copy(alpha = 0.4f)))
                         }
 
                     }
@@ -225,7 +225,7 @@ fun MapCard(
                             .fillMaxHeight()
                             .fillMaxWidth(), contentAlignment = Alignment.Center){
                             Text(
-                                text = "WIN RATE",
+                                text = "WIN RATE", color = Color.White,
                                 style = MaterialTheme.typography.bodyMedium + TextStyle(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                     textIndent = TextIndent(0.sp),
@@ -238,7 +238,7 @@ fun MapCard(
                                     val brawler = viewModel.blist.value.find { it.id!! == active.map.stats[i].brawler }
                                     Box {
                                         ImageAsync(brawler?.bpro.toString(), placeholder = R.drawable.placeholder1, modifier = Modifier.size(40.dp))
-                                        Text(text = "${active.map.stats[i].winRate.toInt()}%", style = MaterialTheme.typography.bodyMedium+ TextStyle(
+                                        Text(text = "${active.map.stats[i].winRate.toInt()}%", color = Color.White, style = MaterialTheme.typography.bodyMedium+ TextStyle(
                                             shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                             textIndent = TextIndent(0.sp),
                                         ), modifier = Modifier
@@ -257,7 +257,7 @@ fun MapCard(
                                         val brawler = viewModel.blist.value.find { it.id!! == active.map.stats[i].brawler }
                                         Box {
                                             ImageAsync(brawler?.bpro.toString(), placeholder = R.drawable.placeholder1, modifier = Modifier.size(40.dp))
-                                            Text(text = "${active.map.stats[i].winRate.toInt()}%", style = MaterialTheme.typography.bodyMedium+ TextStyle(
+                                            Text(text = "${active.map.stats[i].winRate.toInt()}%", color = Color.White, style = MaterialTheme.typography.bodyMedium+ TextStyle(
                                                 shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                                 textIndent = TextIndent(0.sp),
                                             ), modifier = Modifier
