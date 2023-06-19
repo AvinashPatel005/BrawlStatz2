@@ -3,11 +3,16 @@ package com.kal.brawlstatz2
 import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -54,6 +59,7 @@ import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -64,6 +70,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.kal.brawlstatz2.data.BottomNavItem
 import com.kal.brawlstatz2.data.Events
 import com.kal.brawlstatz2.data.clubleague
@@ -78,16 +86,41 @@ import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
+import kotlin.math.log
+
 
 class MainActivity : ComponentActivity() {
     var prevTag = ""
+
+
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+            val token = task.result
+            Log.d(TAG, token)
+        })
         installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
-
             val activity = (LocalContext.current as? Activity)
+
+            if(ContextCompat.checkSelfPermission(LocalContext.current,android.Manifest.permission.POST_NOTIFICATIONS)== PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "granted")
+            }
+            else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),202)
+                }
+                Log.d(TAG, "not granted")
+            }
+
+
+
             val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
             val theme = sharedPref?.getInt("theme",0)
             var tag by remember {
@@ -423,18 +456,20 @@ class MainActivity : ComponentActivity() {
                                                 if(themeMode==1) Icon(Icons.Default.Check, contentDescription = null)
                                             }
                                             Spacer(modifier = Modifier.height(5.dp))
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clickable {
-                                                        themeChanger = false
-                                                        themeMode = 2
-                                                    }
-                                            ){
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .clickable {
+                                                            themeChanger = false
+                                                            themeMode = 2
+                                                        }
+                                                ){
                                                     Text(text = "Dynamic", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                                                if(themeMode==2)Icon(Icons.Default.Check, contentDescription = null)
+                                                    if(themeMode==2)Icon(Icons.Default.Check, contentDescription = null)
+                                                }
                                             }
                                         }
                                     }
