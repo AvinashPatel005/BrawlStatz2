@@ -17,7 +17,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -37,11 +36,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
@@ -72,6 +69,7 @@ import com.kal.brawlstatz2.data.Events
 import com.kal.brawlstatz2.data.clubleague
 import com.kal.brawlstatz2.presentation.BrawlersList
 import com.kal.brawlstatz2.presentation.Curr
+import com.kal.brawlstatz2.presentation.SetTrackerData
 import com.kal.brawlstatz2.presentation.ShimmerListItem
 import com.kal.brawlstatz2.presentation.ShimmerListItem1
 import com.kal.brawlstatz2.presentation.ShimmerListItem2
@@ -80,9 +78,9 @@ import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
-import kotlin.math.log
 
 class MainActivity : ComponentActivity() {
+    var prevTag = ""
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -92,6 +90,12 @@ class MainActivity : ComponentActivity() {
             val activity = (LocalContext.current as? Activity)
             val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
             val theme = sharedPref?.getInt("theme",0)
+            var tag by remember {
+                mutableStateOf(sharedPref?.getString("tag",""))
+            }
+
+
+
             var themeMode by remember {
                 if (theme != null) {
                     mutableIntStateOf(theme)
@@ -103,11 +107,18 @@ class MainActivity : ComponentActivity() {
                     putInt("theme",themeMode)
                     apply()
                 }
+                with (sharedPref.edit()){
+                    putString("tag",tag)
+                    apply()
+                }
             }
 
-
+            val viewModel = viewModel<MainViewModel>()
+            LaunchedEffect(key1 = tag){
+                if(tag!="") viewModel.brawlStats(tag.toString())
+            }
             AppTheme(themeMode){
-                val viewModel = viewModel<MainViewModel>()
+
                     var isSearch by remember {
                         mutableStateOf(false)
                     }
@@ -206,6 +217,16 @@ class MainActivity : ComponentActivity() {
                                                          color = MaterialTheme.colorScheme.onSecondary,
                                                          fontSize = 9.sp
                                                      )
+                                                 }
+                                                 else if (tabCurrent == "tracker"){
+                                                     Icon(imageVector = Icons.Default.Refresh, contentDescription = null,Modifier.clickable {
+                                                         viewModel.brawlStats(tag.toString())
+                                                     })
+                                                     Spacer(modifier = Modifier.width(4.dp))
+                                                     Icon(imageVector = Icons.Default.Edit, contentDescription = null,Modifier.clickable {
+                                                         prevTag=tag.toString()
+                                                         tag=""
+                                                     })
                                                  }
                                                  AnimatedVisibility(
                                                      visible = (isSearch && tabCurrent == "brawler"),
@@ -325,7 +346,8 @@ class MainActivity : ComponentActivity() {
                                 items = listOf(
                                     BottomNavItem("BRAWLER","brawler", Icons.Default.Home),
                                     BottomNavItem("EVENTS","events", Icons.Default.Notifications),
-                                    BottomNavItem("META","meta",Icons.Default.Face)
+                                    BottomNavItem("META","meta",Icons.Default.Face),
+                                    BottomNavItem("TRACK","tracker",Icons.Default.MoreVert)
                                 ),
                                 navController = navController,
                                 onItemClicked = {
@@ -349,7 +371,9 @@ class MainActivity : ComponentActivity() {
                                 .background(MaterialTheme.colorScheme.background)
                         )
                         {
-                                Navigation(navController = navController)
+                                Navigation(navController = navController,tag){
+                                    tag=it
+                                }
                                
 
                             if(viewModel.isUpdateAvailable.value){
@@ -423,7 +447,7 @@ class MainActivity : ComponentActivity() {
 
     }
     @Composable
-    fun Navigation(navController: NavHostController) {
+    fun Navigation(navController: NavHostController,tag :String?,send:(String)->Unit) {
         val viewModel = viewModel<MainViewModel>()
         val brawlers = viewModel.blist.value
         val meta = viewModel.nestedList.value
@@ -479,6 +503,54 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 ShowMetaList(meta,viewModel.sortedMetaList)
+            }
+            composable("tracker"){
+                if(tag!=""){
+                    if(viewModel.isLoadingStats.value==0) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Center){CircularProgressIndicator()}
+                    }
+                    else if(viewModel.isLoadingStats.value==1) SetTrackerData(viewModel)
+                    else {Box(Modifier.fillMaxSize(), contentAlignment = Center){ Text(text = "Something went Wrong!")}
+                    }
+                }
+                else{
+                    GetTag(prevTag){
+                        send(it)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun GetTag(
+    tag:String,
+    onClick: (String) -> Unit
+) {
+    var string by remember {
+        mutableStateOf(tag)
+    }
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Center){
+        Box(
+            Modifier
+                .background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(10.dp))
+                .padding(10.dp)) {
+            Column(modifier = Modifier.fillMaxWidth(0.7f), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "Enter Tag", fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(4.dp))
+                OutlinedTextField(value = string, onValueChange ={
+                    string = it
+                }
+                , leadingIcon = { Text(text = "#")}
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Button(onClick = {
+                    onClick(string)
+                }
+                ) {
+                    Text(text = "OK")
+                }
             }
         }
     }

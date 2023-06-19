@@ -1,7 +1,5 @@
 package com.kal.brawlstatz2.presentation
 
-import android.app.Activity
-import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -38,6 +35,7 @@ import com.kal.brawlstatz2.R
 import com.kal.brawlstatz2.data.Brawler
 import com.kal.brawlstatz2.data.ExpandableCardModel
 import com.kal.brawlstatz2.viewmodel.CardsViewModel
+import com.kal.brawlstatz2.viewmodel.UnlockedViewModel
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 
 @Composable

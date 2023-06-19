@@ -4,8 +4,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.kal.brawlstatz2.data.ExpandableCardModel
+import com.kal.brawlstatz2.data.ExpandedUnlockedBrawler
 
-class CardsViewModel : ViewModel() {
+class UnlockedViewModel : ViewModel() {
 
-    val c1list: MutableState<ExpandableCardModel> = mutableStateOf(ExpandableCardModel(null,false))
+    val c1list: MutableState<ExpandedUnlockedBrawler> = mutableStateOf(ExpandedUnlockedBrawler(0))
 }
