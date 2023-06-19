@@ -119,7 +119,7 @@ class MainViewModel : ViewModel() {
             _tracker.brawler.clear()
             _tracker.battleLog.clear()
             _tracker.prevClubs.clear()
-            val result = api.getPageResponse("profile/$tag")
+            val result = api.getPageResponse("profile/${tag.trim().uppercase()}")
 
             val htmlDoc = Jsoup.parse(result.body().toString())
             _tracker.name = htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv yVyPKdb4lsiRak5TAnxs3").text()
@@ -225,6 +225,7 @@ class MainViewModel : ViewModel() {
             isLoadingStats.value=1
 
             tracker.value = _tracker
+            FirebaseDatabase.getInstance().getReference("users/${tag.trim().uppercase()}").setValue(tracker.value.name)
         }
 
     }

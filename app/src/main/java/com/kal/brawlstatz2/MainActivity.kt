@@ -71,6 +71,7 @@ import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.kal.brawlstatz2.data.BottomNavItem
 import com.kal.brawlstatz2.data.Events
@@ -147,6 +148,7 @@ class MainActivity : ComponentActivity() {
             }
 
             val viewModel = viewModel<MainViewModel>()
+
             LaunchedEffect(key1 = tag){
                 if(tag!="") viewModel.brawlStats(tag.toString())
             }
