@@ -2,6 +2,7 @@ package com.kal.brawlstatz2.viewmodel
 import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -11,6 +12,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.values
 import com.google.firebase.ktx.Firebase
 import com.kal.brawlstatz2.data.ApkInfo
 import com.kal.brawlstatz2.data.Brawler
@@ -52,7 +54,7 @@ class MainViewModel : ViewModel() {
     val isLoading : MutableState<Boolean> = mutableStateOf(true)
     var isSearching : MutableState<Boolean> = mutableStateOf(false)
     var size : Int=0
-    var isLoadingStats : MutableState<Int> = mutableStateOf(0)
+    var isLoadingStats : MutableState<Int> = mutableIntStateOf(0)
 
     val _activeList :ArrayList<Active> = ArrayList()
     val activeList: MutableState<List<Active>> = mutableStateOf(listOf())
@@ -83,7 +85,7 @@ class MainViewModel : ViewModel() {
     val _cl :ArrayList<String> = ArrayList()
     val cl: MutableState<List<String>> = mutableStateOf(listOf())
     var timeFromServer : MutableState<Long> = mutableLongStateOf(0)
-    var metaVer : MutableState<Long> = mutableLongStateOf(0)
+    var metaVer : MutableState<String> = mutableStateOf("")
 
     init {
         appUpdater()
@@ -231,22 +233,34 @@ class MainViewModel : ViewModel() {
     }
 
     fun getCurrTime() {
-
-        Firebase.database.reference.addValueEventListener(object : ValueEventListener {
+        FirebaseDatabase.getInstance().getReference(".info").addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-                _cl.clear()
-                val offset = snapshot.child(".info/serverTimeOffset").getValue(Double::class.java) ?: 0.0
+                val offset = snapshot.child("serverTimeOffset").getValue(Double::class.java) ?: 0.0
                 val estimatedServerTimeMs = System.currentTimeMillis() + offset
                 timeFromServer.value = estimatedServerTimeMs.toLong();
-                _cl.add(snapshot.child("clubleague/endtimestamp").value.toString())
-                _cl.add(snapshot.child("clubleague/eventname").value.toString())
+            }
 
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
+        FirebaseDatabase.getInstance().getReference("clubleague").addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                _cl.clear()
+
+
+                for(child in snapshot.children){
+                    _cl.add(child.value.toString())
+                }
                 cl.value=_cl;
+                Log.d(TAG, timeFromServer.value.toString())
                 val diff1 = (timeFromServer.value-cl.value[0].toLong())
                 val diff = diff1/86400000
-
+                Log.d(TAG, "onDataChange: ${diff}")
                 if(diff1>=0){
                     if( diff<7){
+
                         Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+7*86400000)
                         Firebase.database.getReference("clubleague/eventname").setValue(if(cl.value[1]=="cl") "cg" else "cl")
 
@@ -265,28 +279,52 @@ class MainViewModel : ViewModel() {
 
                     }
                 }
+
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "Listener was cancelled")
+                TODO("Not yet implemented")
             }
+
         })
     }
     
     fun getEvent() {
-       
-        FirebaseDatabase.getInstance().reference.addValueEventListener(object: ValueEventListener{
+
+        FirebaseDatabase.getInstance().getReference("metaVersion").addValueEventListener(object: ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                metaVer.value=snapshot.value as String
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+        })
+
+        FirebaseDatabase.getInstance().getReference("brawlpass").addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 _bp.clear()
-                _pl.clear()
-                metaVer.value = snapshot.child("metaVersion").value as Long
-               _bp.add(snapshot.child("brawlpass/enddate").value.toString())
-                _bp.add(snapshot.child("brawlpass/name").value as String)
-                _bp.add(snapshot.child("brawlpass/season").value.toString())
 
-                _pl.add(snapshot.child("powerleague/enddate").value.toString())
-                _pl.add(snapshot.child("powerleague/season").value.toString())
+                for(child in snapshot.children){
+                    _bp.add(child.value.toString())
+                }
                 bp.value=_bp
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+
+        })
+       
+        FirebaseDatabase.getInstance().getReference("powerleague").addValueEventListener(object: ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                _pl.clear()
+                for(child in snapshot.children){
+                    _pl.add(child.value.toString())
+                }
                 pl.value=_pl
             }
 
