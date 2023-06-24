@@ -91,10 +91,7 @@ import kotlin.math.log
 
 
 class MainActivity : ComponentActivity() {
-    var prevTag = ""
-
-
-
+    private var prevTag = ""
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -121,14 +118,11 @@ class MainActivity : ComponentActivity() {
             }
 
 
-
             val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
             val theme = sharedPref?.getInt("theme",0)
             var tag by remember {
                 mutableStateOf(sharedPref?.getString("tag",""))
             }
-
-
 
             var themeMode by remember {
                 if (theme != null) {
