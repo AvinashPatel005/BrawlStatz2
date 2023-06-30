@@ -88,7 +88,7 @@ import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 import kotlin.math.log
-
+//check
 
 class MainActivity : ComponentActivity() {
     private var prevTag = ""
