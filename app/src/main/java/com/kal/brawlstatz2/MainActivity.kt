@@ -173,11 +173,9 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 LaunchedEffect(key1 = true) {
-                    println("blocked it")
                     navController.enableOnBackPressed(false)
                 }
                 BackHandler(onBack = {
-                    println("pressed")
                     if (navController.currentDestination?.route == "brawler") {
                         activity?.finish()
                     } else {
