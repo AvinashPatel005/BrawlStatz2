@@ -51,6 +51,9 @@ class MainViewModel : ViewModel() {
     val blist: MutableState<List<Brawler>> = mutableStateOf(listOf())
     var nestedList: MutableState<List<MetaTier>> = mutableStateOf(listOf())
 
+    var apiLock:MutableState<Boolean> = mutableStateOf(true)
+    var downloadId:Long=-1L
+
     val isLoading : MutableState<Boolean> = mutableStateOf(true)
     var isSearching : MutableState<Boolean> = mutableStateOf(false)
     var size : Int=0
@@ -62,7 +65,7 @@ class MainViewModel : ViewModel() {
     val _upcomingList :ArrayList<Active> = ArrayList()
     val upcomingList: MutableState<List<Active>> = mutableStateOf(listOf())
 
-    val _info  = ApkInfo("","");
+    val _info  = ApkInfo("0","");
     var isUpdateAvailable : MutableState<Boolean> = mutableStateOf(false)
 
     val _changelog : ArrayList<String> = ArrayList()
@@ -290,7 +293,16 @@ class MainViewModel : ViewModel() {
     }
     
     fun getEvent() {
+        FirebaseDatabase.getInstance().getReference("apiLock").addValueEventListener(object: ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                apiLock.value=snapshot.value as Boolean
+            }
 
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+        })
         FirebaseDatabase.getInstance().getReference("metaVersion").addValueEventListener(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 metaVer.value=snapshot.value as String
@@ -301,6 +313,7 @@ class MainViewModel : ViewModel() {
             }
 
         })
+
 
         FirebaseDatabase.getInstance().getReference("brawlpass").addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -334,7 +347,7 @@ class MainViewModel : ViewModel() {
         })
     }
 
-    private fun appUpdater() {
+    fun appUpdater() {
         FirebaseDatabase.getInstance().getReference("app").addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 _changelog.clear()
@@ -352,7 +365,6 @@ class MainViewModel : ViewModel() {
             }
 
         })
-
     }
 
 
@@ -460,6 +472,7 @@ class MainViewModel : ViewModel() {
         nestedList.value=find
     }
     private fun fetchData(){
+
         FirebaseDatabase.getInstance().getReference("traits").addValueEventListener(object:ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 traits.clear()

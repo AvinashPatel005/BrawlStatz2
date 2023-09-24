@@ -223,84 +223,84 @@ fun SetTrackerData(viewModel: MainViewModel) {
                        )
                        .size(45.dp))
                }
-               Box(contentAlignment = Alignment.BottomCenter) {
-                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
-
-                       Box(modifier = Modifier
-                           .height(40.dp)
-                           .fillMaxWidth()
-                           .background(MaterialTheme.colorScheme.primaryContainer),
-                           contentAlignment = Alignment.CenterStart){
-                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                               Row() {
-                                   Spacer(modifier = Modifier.width(35.dp))
-                                   Text(text = "Highest Solo League", fontWeight = FontWeight.Bold)
-                               }
-                               Row() {
-                                   GlideImage(model = data.league.highestSoloImg, contentDescription = null, modifier = Modifier.size(40.dp))
-                                   Spacer(modifier = Modifier.width(10.dp))
-                               }
-                           }
-                       }
-                   }
-                   Image(painter = painterResource(id = R.drawable.hsl), contentDescription = null, modifier = Modifier
-                       .align(
-                           Alignment.CenterStart
-                       )
-                       .size(45.dp))
-               }
-               Box(contentAlignment = Alignment.BottomCenter) {
-                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
-
-                       Box(modifier = Modifier
-                           .height(40.dp)
-                           .fillMaxWidth()
-                           .background(MaterialTheme.colorScheme.primaryContainer),
-                           contentAlignment = Alignment.CenterStart){
-                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                               Row() {
-                                   Spacer(modifier = Modifier.width(35.dp))
-                                   Text(text = "Highest Team League", fontWeight = FontWeight.Bold)
-                               }
-                               Row() {
-                                   GlideImage(model = data.league.highestTeamImg, contentDescription = null, modifier = Modifier.size(40.dp))
-                                   Spacer(modifier = Modifier.width(10.dp))
-                               }
-                           }
-                       }
-                   }
-                   Image(painter = painterResource(id = R.drawable.htl), contentDescription = null, modifier = Modifier
-                       .align(
-                           Alignment.CenterStart
-                       )
-                       .size(45.dp))
-               }
-               Box(contentAlignment = Alignment.BottomCenter) {
-                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
-
-                       Box(modifier = Modifier
-                           .height(40.dp)
-                           .fillMaxWidth()
-                           .background(MaterialTheme.colorScheme.primaryContainer),
-                           contentAlignment = Alignment.CenterStart){
-                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                               Row() {
-                                   Spacer(modifier = Modifier.width(35.dp))
-                                   Text(text = "Highest Club League", fontWeight = FontWeight.Bold)
-                               }
-                               Row() {
-                                   GlideImage(model = data.league.highestClubImg, contentDescription = null, modifier = Modifier.size(40.dp))
-                                   Spacer(modifier = Modifier.width(10.dp))
-                               }
-                           }
-                       }
-                   }
-                   Image(painter = painterResource(id = R.drawable.hcl), contentDescription = null, modifier = Modifier
-                       .align(
-                           Alignment.CenterStart
-                       )
-                       .size(45.dp))
-               }
+//               Box(contentAlignment = Alignment.BottomCenter) {
+//                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
+//
+//                       Box(modifier = Modifier
+//                           .height(40.dp)
+//                           .fillMaxWidth()
+//                           .background(MaterialTheme.colorScheme.primaryContainer),
+//                           contentAlignment = Alignment.CenterStart){
+//                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+//                               Row() {
+//                                   Spacer(modifier = Modifier.width(35.dp))
+//                                   Text(text = "Highest Solo League", fontWeight = FontWeight.Bold)
+//                               }
+//                               Row() {
+//                                   GlideImage(model = data.league.highestSoloImg, contentDescription = null, modifier = Modifier.size(40.dp))
+//                                   Spacer(modifier = Modifier.width(10.dp))
+//                               }
+//                           }
+//                       }
+//                   }
+//                   Image(painter = painterResource(id = R.drawable.hsl), contentDescription = null, modifier = Modifier
+//                       .align(
+//                           Alignment.CenterStart
+//                       )
+//                       .size(45.dp))
+//               }
+//               Box(contentAlignment = Alignment.BottomCenter) {
+//                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
+//
+//                       Box(modifier = Modifier
+//                           .height(40.dp)
+//                           .fillMaxWidth()
+//                           .background(MaterialTheme.colorScheme.primaryContainer),
+//                           contentAlignment = Alignment.CenterStart){
+//                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+//                               Row() {
+//                                   Spacer(modifier = Modifier.width(35.dp))
+//                                   Text(text = "Highest Team League", fontWeight = FontWeight.Bold)
+//                               }
+//                               Row() {
+//                                   GlideImage(model = data.league.highestTeamImg, contentDescription = null, modifier = Modifier.size(40.dp))
+//                                   Spacer(modifier = Modifier.width(10.dp))
+//                               }
+//                           }
+//                       }
+//                   }
+//                   Image(painter = painterResource(id = R.drawable.htl), contentDescription = null, modifier = Modifier
+//                       .align(
+//                           Alignment.CenterStart
+//                       )
+//                       .size(45.dp))
+//               }
+//               Box(contentAlignment = Alignment.BottomCenter) {
+//                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
+//
+//                       Box(modifier = Modifier
+//                           .height(40.dp)
+//                           .fillMaxWidth()
+//                           .background(MaterialTheme.colorScheme.primaryContainer),
+//                           contentAlignment = Alignment.CenterStart){
+//                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+//                               Row() {
+//                                   Spacer(modifier = Modifier.width(35.dp))
+//                                   Text(text = "Highest Club League", fontWeight = FontWeight.Bold)
+//                               }
+//                               Row() {
+//                                   GlideImage(model = data.league.highestClubImg, contentDescription = null, modifier = Modifier.size(40.dp))
+//                                   Spacer(modifier = Modifier.width(10.dp))
+//                               }
+//                           }
+//                       }
+//                   }
+//                   Image(painter = painterResource(id = R.drawable.hcl), contentDescription = null, modifier = Modifier
+//                       .align(
+//                           Alignment.CenterStart
+//                       )
+//                       .size(45.dp))
+//               }
 
            }
 
@@ -418,41 +418,41 @@ fun SetTrackerData(viewModel: MainViewModel) {
                             .size(45.dp)
                     )
                 }
-                Box(contentAlignment = Alignment.BottomCenter) {
-                    Row(modifier = Modifier.padding(horizontal = 14.dp)) {
-
-                        Box(
-                            modifier = Modifier
-                                .height(40.dp)
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row() {
-                                    Spacer(modifier = Modifier.width(35.dp))
-                                    Text(text = "Most Challenge Wins", fontWeight = FontWeight.Bold)
-                                }
-                                Text(
-                                    text = data.victories.challenge + "  ",
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                    Image(
-                        painter = painterResource(id = R.drawable.challenges),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .align(
-                                Alignment.CenterStart
-                            )
-                            .size(45.dp)
-                    )
-                }
+//                Box(contentAlignment = Alignment.BottomCenter) {
+//                    Row(modifier = Modifier.padding(horizontal = 14.dp)) {
+//
+//                        Box(
+//                            modifier = Modifier
+//                                .height(40.dp)
+//                                .fillMaxWidth()
+//                                .background(MaterialTheme.colorScheme.primaryContainer),
+//                            contentAlignment = Alignment.CenterStart
+//                        ) {
+//                            Row(
+//                                horizontalArrangement = Arrangement.SpaceBetween,
+//                                modifier = Modifier.fillMaxWidth()
+//                            ) {
+//                                Row() {
+//                                    Spacer(modifier = Modifier.width(35.dp))
+//                                    Text(text = "Most Challenge Wins", fontWeight = FontWeight.Bold)
+//                                }
+//                                Text(
+//                                    text = data.victories.challenge + "  ",
+//                                    fontWeight = FontWeight.Bold
+//                                )
+//                            }
+//                        }
+//                    }
+//                    Image(
+//                        painter = painterResource(id = R.drawable.challenges),
+//                        contentDescription = null,
+//                        modifier = Modifier
+//                            .align(
+//                                Alignment.CenterStart
+//                            )
+//                            .size(45.dp)
+//                    )
+//                }
 
             }
         }
@@ -494,7 +494,6 @@ fun SetTrackerData(viewModel: MainViewModel) {
                     val i1 = 2 * (it + 1) - 2
                     Column(modifier = Modifier
                         .fillMaxWidth(0.5f)
-                        .height(120.dp)
                         .padding(end = 2.dp, bottom = 4.dp)
                         .border(width = 1.dp, Color.Black)) {
                         Box(
@@ -546,8 +545,7 @@ fun SetTrackerData(viewModel: MainViewModel) {
                         Row(
                             Modifier
                                 .background(Color.Black)
-                                .fillMaxWidth()
-                                .height(40.dp),
+                                .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ){
                             Column{
@@ -577,7 +575,6 @@ fun SetTrackerData(viewModel: MainViewModel) {
                     if(i1+1<data.brawler.size){
                         Column(modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
                             .padding(start = 2.dp, bottom = 4.dp)
                             .border(width = 1.dp, Color.Black)) {
                             Box(
@@ -629,8 +626,7 @@ fun SetTrackerData(viewModel: MainViewModel) {
                             Row(
                                 Modifier
                                     .background(Color.Black)
-                                    .fillMaxWidth()
-                                    .height(40.dp),
+                                    .fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ){
                                 Column{
