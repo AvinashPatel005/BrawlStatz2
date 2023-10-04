@@ -1,5 +1,6 @@
 package com.kal.brawlstatz2.presentation
 
+import android.content.Intent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -56,6 +57,7 @@ fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainVi
             val list = listOf(
                 "All",
                 "Traits",
+                "3D",
                 "Chromatic",
                 "Legendary",
                 "Mythic",
@@ -67,7 +69,7 @@ fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainVi
             items(list) { s ->
                 Spacer(modifier = Modifier.width(10.dp))
                 Button(
-                    modifier = if (s == "Traits") {
+                    modifier = if (s == "Traits"||s == "3D") {
                         Modifier
                             .border(
                                 width = 2.dp,
@@ -124,7 +126,7 @@ fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainVi
 fun BrawlerCard(
     brawler: Brawler,
     cardModel: CardsViewModel,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
 ) {
     val cardId = brawler.bname
     val cardHeight: Dp = 92.dp
@@ -147,7 +149,17 @@ fun BrawlerCard(
         Box(
             modifier = Modifier.fillMaxWidth()
         ){
+            if(isExp) Image(painter = painterResource(id = R.drawable.external),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .clickable{
+                        cardModel.c1list.value = ExpandableCardModel(cardId, false)
+                        viewModel.previewBrawler.value=brawler
+                    })
             Column {
+
                 Row(
                     modifier= Modifier
                         .animateContentSize()
@@ -204,31 +216,35 @@ fun BrawlerCard(
                             }
                         }
                     }
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.Bottom),
-                    ) {
-                        CounterColumn(
-                            url = brawler.c1.toString(),
-                            name = brawler.c1n.toString(),
-                            placeholder = R.drawable.placeholder4,
-                            isExp = isExp
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        CounterColumn(
-                            url = brawler.c2.toString(),
-                            name = brawler.c2n.toString(),
-                            placeholder = R.drawable.placeholder3,
-                            isExp = isExp
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        CounterColumn(
-                            url = brawler.c3.toString(),
-                            name = brawler.c3n.toString(),
-                            placeholder = R.drawable.placeholder2,
-                            isExp = isExp
-                        )
-                    }
+                   Column(modifier = Modifier
+                       .align(Alignment.Bottom),
+                       horizontalAlignment = Alignment.CenterHorizontally
+                       ) {
+                       if(isExp) Text("COUNTERS", fontSize = 10.sp, lineHeight = 10.sp)
+                       Row(
+                       ) {
+                           CounterColumn(
+                               url = brawler.c1.toString(),
+                               name = brawler.c1n.toString(),
+                               placeholder = R.drawable.placeholder4,
+                               isExp = isExp
+                           )
+                           Spacer(modifier = Modifier.width(2.dp))
+                           CounterColumn(
+                               url = brawler.c2.toString(),
+                               name = brawler.c2n.toString(),
+                               placeholder = R.drawable.placeholder3,
+                               isExp = isExp
+                           )
+                           Spacer(modifier = Modifier.width(2.dp))
+                           CounterColumn(
+                               url = brawler.c3.toString(),
+                               name = brawler.c3n.toString(),
+                               placeholder = R.drawable.placeholder2,
+                               isExp = isExp
+                           )
+                       }
+                   }
                 }
 
                 //Expandable Part
@@ -246,7 +262,11 @@ fun BrawlerCard(
                                 color = MaterialTheme.colorScheme.onPrimary
                             ))
                             Box(modifier = Modifier
-                                .border(1.dp, MaterialTheme.colorScheme.onSecondary, RoundedCornerShape(10.dp))
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.onSecondary,
+                                    RoundedCornerShape(10.dp)
+                                )
                                 .clip(RoundedCornerShape(10.dp))
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp, horizontal = 4.dp)
@@ -525,7 +545,8 @@ fun CounterColumn(url: String, name: String, placeholder: Int, isExp: Boolean) {
             fontSize = 8.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.width(43.dp),
-            color = MaterialTheme.colorScheme.onSecondary
+            color = MaterialTheme.colorScheme.onSecondary,
+            lineHeight = 8.sp
         )
     }
 }

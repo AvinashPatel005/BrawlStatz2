@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kal.brawlstatz2.viewmodel.MainViewModel
 
 class UpdateBroadcastReceiver:BroadcastReceiver() {
     private lateinit var downloadManager: DownloadManager

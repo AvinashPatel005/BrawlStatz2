@@ -1,5 +1,6 @@
 package com.kal.brawlstatz2.viewmodel
 import android.content.ContentValues.TAG
+import android.os.Build
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
@@ -50,6 +51,8 @@ class MainViewModel : ViewModel() {
     var traits : ArrayList<Trait> = ArrayList();
     val blist: MutableState<List<Brawler>> = mutableStateOf(listOf())
     var nestedList: MutableState<List<MetaTier>> = mutableStateOf(listOf())
+
+    var previewBrawler:MutableState<Brawler?> = mutableStateOf(null)
 
     var apiLock:MutableState<Boolean> = mutableStateOf(true)
     var downloadId:Long=-1L
@@ -256,14 +259,11 @@ class MainViewModel : ViewModel() {
                 for(child in snapshot.children){
                     _cl.add(child.value.toString())
                 }
-                cl.value=_cl;
-                Log.d(TAG, timeFromServer.value.toString())
+                cl.value=_cl
                 val diff1 = (timeFromServer.value-cl.value[0].toLong())
                 val diff = diff1/86400000
-                Log.d(TAG, "onDataChange: ${diff}")
                 if(diff1>=0){
                     if( diff<7){
-
                         Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+7*86400000)
                         Firebase.database.getReference("clubleague/eventname").setValue(if(cl.value[1]=="cl") "cg" else "cl")
 
@@ -400,6 +400,13 @@ class MainViewModel : ViewModel() {
                 }
             }
         }
+        else if(txt=="3d"){
+            for (brawler in list){
+                if(brawler.model3d=="true"){
+                    sortedlist.add(brawler)
+                }
+            }
+        }
         else{
             for(brawler in list){
                 if(brawler.bname?.lowercase()?.startsWith(txt) == true||brawler.brare?.lowercase()?.startsWith(txt) == true){
@@ -494,10 +501,11 @@ class MainViewModel : ViewModel() {
                     for(DataSnap in snapshot.children){
                         val brawler = DataSnap.getValue(Brawler::class.java)
                         if (brawler != null) {
+                            brawler.classType = DataSnap.child("class").value as String
                             brawler.bpro =
                                 "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname!!.lowercase() + "%2F" + DataSnap.key + ".webp?alt=media&token="+brawler.zver
                             brawler.bmodel =
-                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2FF" + brawler.bname.lowercase() + "%2F" + DataSnap.key + "_Skin-Default.webp?alt=media&token="+brawler.zver
+                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2F" + DataSnap.key + "_Skin-Default.webp?alt=media&token="+brawler.zver
                             brawler.g1 =
                                 "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FGD-" + DataSnap.key + "1.webp?alt=media&token="+brawler.zver
                             brawler.g2 =
@@ -520,6 +528,7 @@ class MainViewModel : ViewModel() {
                                 "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/gears%2F" + brawler.bgear2?.lowercase() + ".webp?alt=media&token="+brawler.zver
                             if (brawler.bgear3 != null) brawler.bgear3 =
                                 "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/gears%2F" + brawler.bgear3!!.lowercase() + ".webp?alt=media&token="+brawler.zver
+                            brawler.model ="https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2F" + DataSnap.key + "Model.glb?alt=media&token="+brawler.zver
                             when(brawler.brare){
                                 "LEGENDARY" -> brawler.color= legendary
                                 "MYTHIC" -> brawler.color= mythic

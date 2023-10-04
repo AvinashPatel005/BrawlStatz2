@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.DownloadManager
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
@@ -38,7 +39,6 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.TopEnd
 import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -113,12 +113,10 @@ class MainActivity : ComponentActivity() {
                     android.Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
-                Log.d(TAG, "granted")
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 202)
                 }
-                Log.d(TAG, "not granted")
             }
 
 
@@ -171,9 +169,10 @@ class MainActivity : ComponentActivity() {
 
 
                 val navController = rememberNavController()
-
+//                val navController2 = rememberNavController()
                 LaunchedEffect(key1 = true) {
                     navController.enableOnBackPressed(false)
+//                    navController2.enableOnBackPressed(false)
                 }
                 BackHandler(onBack = {
                     if (navController.currentDestination?.route == "brawler") {
@@ -202,400 +201,421 @@ class MainActivity : ComponentActivity() {
                         focusManager.clearFocus()
                     }
                 }
-                Scaffold(
-                    topBar = {
-                        Column {
-
-                            TopAppBar(
-                                title = {
-                                    if (!isSearch) {
-                                        Text(
-                                            "BrawlStatz2",
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            color = MaterialTheme.colorScheme.onBackground,
-                                            fontWeight = FontWeight.Bold,
-                                        )
-                                    }
-                                },
-                                colors = TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.background),
-                                navigationIcon = {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.logo_menu),
-                                        contentDescription = null,
-                                        modifier = Modifier.padding(
-                                            start = 10.dp,
-                                            end = 4.dp
-                                        ),
-                                        tint = MaterialTheme.colorScheme.onBackground
-                                    )
-                                },
-
-                                actions = {
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        if (tabCurrent == "events") {
-                                            Text(
-                                                text = "EVENTS    ",
-                                                color = MaterialTheme.colorScheme.onSecondary,
-                                                fontSize = 9.sp
-                                            )
-                                        } else if (tabCurrent == "meta") {
-                                            Text(
-                                                text = "V${viewModel.metaVer.value}   ",
-                                                color = MaterialTheme.colorScheme.onSecondary,
-                                                fontSize = 9.sp
-                                            )
-                                        } else if (tabCurrent == "tracker") {
-                                            Icon(
-                                                imageVector = Icons.Default.Refresh,
-                                                contentDescription = null,
-                                                Modifier.clickable {
-                                                    viewModel.brawlStats(tag.toString())
-                                                })
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Icon(
-                                                imageVector = Icons.Default.Edit,
-                                                contentDescription = null,
-                                                Modifier.clickable {
-                                                    prevTag = tag.toString()
-                                                    tag = ""
-                                                })
-                                        }
-                                        AnimatedVisibility(
-                                            visible = (isSearch && tabCurrent == "brawler"),
-                                            enter = fadeIn(),
-                                            exit = fadeOut()
-                                        ) {
-
-                                            isVisible = !isVisible
-                                            OutlinedTextField(
-                                                value = value,
-                                                onValueChange = {
-                                                    viewModel.isSearching.value = true
-                                                    value = it
-                                                    viewModel.find(value.lowercase())
-                                                },
-                                                modifier = Modifier
-                                                    .focusRequester(focusRequester)
-                                                    .scale(scaleY = 0.9F, scaleX = 1F),
-
-                                                placeholder = {
-                                                    Text(
-                                                        text = " Search",
-                                                        color = MaterialTheme.colorScheme.onTertiaryContainer
-                                                    )
-                                                },
-                                                shape = RoundedCornerShape(100),
-                                                colors = OutlinedTextFieldDefaults.colors(
-                                                    focusedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                                    unfocusedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                                    disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                                    focusedBorderColor = MaterialTheme.colorScheme.background,
-                                                    unfocusedBorderColor = MaterialTheme.colorScheme.background,
-                                                    cursorColor = MaterialTheme.colorScheme.onTertiaryContainer
-                                                )
-                                            )
-                                        }
-                                        Card(
-                                            modifier = Modifier.clip(RoundedCornerShape(100)),
-                                            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
-                                        ) {
-                                            if (tabCurrent == "brawler") {
-                                                IconButton(onClick = {
-                                                    if (value == "") {
-                                                        isSearch = !isSearch
-                                                        viewModel.isSearching.value = false
-                                                    } else {
-                                                        value = ""
-                                                        viewModel.find(value.lowercase())
-                                                    }
-
-                                                }) {
-                                                    Icon(
-                                                        if (isSearch) Icons.Default.Close
-                                                        else Icons.Default.Search,
-                                                        contentDescription = "search",
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                    },
-
-                    floatingActionButton = {
-                        if (tabCurrent != "events") {
-
-
-                            Column(horizontalAlignment = Alignment.End) {
-                                AnimatedVisibility(visible = fabExpanded) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = "Soon ",
-                                            style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                                shadow = Shadow(
-                                                    offset = Offset(1f, 1f),
-                                                    blurRadius = 20f
-                                                ),
-                                                textIndent = TextIndent(0.sp),
-                                                fontSize = 20.sp
-                                            ),
-                                            color = Color.White
-                                        )
-                                        FloatingActionButton(
-                                            onClick = { },
-                                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                            shape = CircleShape,
-                                            modifier = Modifier.size(60.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.MoreVert,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-
-                                }
-                                Spacer(modifier = Modifier.height(6.dp))
-                                AnimatedVisibility(visible = fabExpanded) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = "Check for Updates ",
-                                            style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                                shadow = Shadow(
-                                                    offset = Offset(1f, 1f),
-                                                    blurRadius = 20f
-                                                ),
-                                                textIndent = TextIndent(0.sp),
-                                                fontSize = 20.sp
-                                            ),
-                                            color = Color.White
-                                        )
-                                        FloatingActionButton(
-                                            onClick = {
-                                                fabExpanded = !fabExpanded
-                                                viewModel.isUpdateAvailable.value =
-                                                    viewModel._info.version.toFloat() > BuildConfig.VERSION_NAME.toFloat()
-                                                if (!viewModel.isUpdateAvailable.value) Toast.makeText(
-                                                    applicationContext,
-                                                    "Latest Version Installed",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            },
-                                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                            shape = CircleShape,
-                                            modifier = Modifier.size(60.dp)
-                                        ) {
-                                            Icon(
-                                                painter = painterResource(id = R.drawable.cloud),
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-
-                                }
-                                Spacer(modifier = Modifier.height(6.dp))
-                                AnimatedVisibility(visible = fabExpanded) {
-
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(
-                                            text = "Theme ",
-                                            style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                                shadow = Shadow(
-                                                    offset = Offset(1f, 1f),
-                                                    blurRadius = 20f
-                                                ),
-                                                textIndent = TextIndent(0.sp),
-                                                fontSize = 20.sp
-                                            ),
-                                            color = Color.White
-                                        )
-                                        FloatingActionButton(
-                                            onClick = {
-                                                fabExpanded = !fabExpanded
-                                                themeChanger = true
-
-                                            },
-                                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                            shape = CircleShape,
-                                            modifier = Modifier.size(60.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                Log.d(TAG, "onCreate: tb")
-                                FloatingActionButton(
-                                    onClick = { fabExpanded = !fabExpanded },
-                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                    shape = RoundedCornerShape(20.dp),
-                                    modifier = Modifier.size(60.dp)
-                                ) {
-                                    var angle = animateFloatAsState(
-                                        targetValue = if (fabExpanded) 1.0F else 0F,
-                                        animationSpec = tween(durationMillis = 1000)
-                                    )
-
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                        modifier = Modifier.rotate(135 * angle.value)
-                                    )
-                                }
-                            }
-
-                        }
-                    },
-                    bottomBar = {
-                        BottomNavBar(
-                            items = listOf(
-                                BottomNavItem("BRAWLER", "brawler", Icons.Default.Home),
-                                BottomNavItem("EVENTS", "events", Icons.Default.Notifications),
-                                BottomNavItem("META", "meta", Icons.Default.Face),
-                                BottomNavItem("TRACK", "tracker", Icons.Default.MoreVert)
-                            ),
-                            navController = navController,
-                            onItemClicked = {
-                                tabCurrent = it.route
-                                isSearch = false
-                                value = ""
-                                viewModel.isSearching.value = false
-                                viewModel.find(value.lowercase())
-                                navController.navigate(it.route)
-                            }
-                        )
-                    }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(
-                                top = it.calculateTopPadding(),
-                                bottom = it.calculateBottomPadding()
-                            )
-                            .background(MaterialTheme.colorScheme.background)
-                    )
-                    {
-                        Navigation(navController = navController, tag) {
-                            tag = it
-                        }
-
-
-                        if (viewModel.isUpdateAvailable.value) {
-                            Update(viewModel, applicationContext)
-                        }
-                        if (themeChanger) {
-                            AlertDialog(onDismissRequest = { themeChanger = false }) {
-                                Box(
-                                    modifier = Modifier
-                                        .clip(
-                                            RoundedCornerShape(20.dp)
-                                        )
-                                        .background(
-                                            MaterialTheme.colorScheme.tertiaryContainer
-                                        )
-                                        .fillMaxWidth()
-                                        .padding(20.dp)
-
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = "Choose theme",
-                                            fontWeight = FontWeight.ExtraBold,
-                                            fontSize = 25.sp
-                                        )
-                                        Spacer(modifier = Modifier.height(5.dp))
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    themeChanger = false
-                                                    themeMode = 0
-                                                }
-                                        ) {
-                                            Text(
-                                                text = "Dark",
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 18.sp
-                                            )
-                                            if (themeMode == 0) Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.height(5.dp))
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    themeChanger = false
-                                                    themeMode = 1
-                                                }
-                                        ) {
-                                            Text(
-                                                text = "Light",
-                                                fontWeight = FontWeight.Bold,
-                                                fontSize = 18.sp
-                                            )
-                                            if (themeMode == 1) Icon(
-                                                Icons.Default.Check,
-                                                contentDescription = null
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.height(5.dp))
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clickable {
-                                                        themeChanger = false
-                                                        themeMode = 2
-                                                    }
-                                            ) {
-                                                Text(
-                                                    text = "Dynamic",
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 18.sp
-                                                )
-                                                if (themeMode == 2) Icon(
-                                                    Icons.Default.Check,
-                                                    contentDescription = null
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                LaunchedEffect(key1 = viewModel.previewBrawler.value){
+                    if(viewModel.previewBrawler.value!=null) Intent(applicationContext,previewActivity::class.java).also {
+                        var bundle = Bundle()
+                        var parcel = viewModel.previewBrawler.value
+                        bundle.putParcelable("preview",parcel)
+                        it.putExtra("theme",themeMode)
+                        it.putExtra("bundle",bundle)
+                        startActivity(it)
+                        viewModel.previewBrawler.value=null
                     }
                 }
+
+//                NavHost(navController = navController2, startDestination = "main"){
+//                    composable("main"){
+                        Scaffold(
+                            topBar = {
+                                Column {
+
+                                    TopAppBar(
+                                        title = {
+                                            if (!isSearch) {
+                                                Text(
+                                                    "BrawlStatz2",
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = MaterialTheme.colorScheme.onBackground,
+                                                    fontWeight = FontWeight.Bold,
+                                                )
+                                            }
+                                        },
+                                        colors = TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.background),
+                                        navigationIcon = {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.logo_menu),
+                                                contentDescription = null,
+                                                modifier = Modifier.padding(
+                                                    start = 10.dp,
+                                                    end = 4.dp
+                                                ),
+                                                tint = MaterialTheme.colorScheme.onBackground
+                                            )
+                                        },
+
+                                        actions = {
+
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                if (tabCurrent == "events") {
+                                                    Text(
+                                                        text = "EVENTS    ",
+                                                        color = MaterialTheme.colorScheme.onSecondary,
+                                                        fontSize = 9.sp
+                                                    )
+                                                } else if (tabCurrent == "meta") {
+                                                    Text(
+                                                        text = "V${viewModel.metaVer.value}   ",
+                                                        color = MaterialTheme.colorScheme.onSecondary,
+                                                        fontSize = 9.sp
+                                                    )
+                                                } else if (tabCurrent == "tracker") {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Refresh,
+                                                        contentDescription = null,
+                                                        Modifier.clickable {
+                                                            viewModel.brawlStats(tag.toString())
+                                                        })
+                                                    Spacer(modifier = Modifier.width(4.dp))
+                                                    Icon(
+                                                        imageVector = Icons.Default.Edit,
+                                                        contentDescription = null,
+                                                        Modifier.clickable {
+                                                            prevTag = tag.toString()
+                                                            tag = ""
+                                                        })
+                                                }
+                                                AnimatedVisibility(
+                                                    visible = (isSearch && tabCurrent == "brawler"),
+                                                    enter = fadeIn(),
+                                                    exit = fadeOut()
+                                                ) {
+
+                                                    isVisible = !isVisible
+                                                    OutlinedTextField(
+                                                        value = value,
+                                                        onValueChange = {
+                                                            viewModel.isSearching.value = true
+                                                            value = it
+                                                            viewModel.find(value.lowercase())
+                                                        },
+                                                        modifier = Modifier
+                                                            .focusRequester(focusRequester)
+                                                            .scale(scaleY = 0.9F, scaleX = 1F),
+
+                                                        placeholder = {
+                                                            Text(
+                                                                text = " Search",
+                                                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                                                            )
+                                                        },
+                                                        shape = RoundedCornerShape(100),
+                                                        colors = OutlinedTextFieldDefaults.colors(
+                                                            focusedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                            unfocusedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                            disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                            focusedBorderColor = MaterialTheme.colorScheme.background,
+                                                            unfocusedBorderColor = MaterialTheme.colorScheme.background,
+                                                            cursorColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                                        )
+                                                    )
+                                                }
+                                                Card(
+                                                    modifier = Modifier.clip(RoundedCornerShape(100)),
+                                                    colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiaryContainer)
+                                                ) {
+                                                    if (tabCurrent == "brawler") {
+                                                        IconButton(onClick = {
+                                                            if (value == "") {
+                                                                isSearch = !isSearch
+                                                                viewModel.isSearching.value = false
+                                                            } else {
+                                                                value = ""
+                                                                viewModel.find(value.lowercase())
+                                                            }
+
+                                                        }) {
+                                                            Icon(
+                                                                if (isSearch) Icons.Default.Close
+                                                                else Icons.Default.Search,
+                                                                contentDescription = "search",
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
+                            },
+
+                            floatingActionButton = {
+                                if (tabCurrent != "events") {
+
+
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        AnimatedVisibility(visible = fabExpanded) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = "Soon ",
+                                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                                        shadow = Shadow(
+                                                            offset = Offset(1f, 1f),
+                                                            blurRadius = 20f
+                                                        ),
+                                                        textIndent = TextIndent(0.sp),
+                                                        fontSize = 20.sp
+                                                    ),
+                                                    color = Color.White
+                                                )
+                                                FloatingActionButton(
+                                                    onClick = { },
+                                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                    shape = CircleShape,
+                                                    modifier = Modifier.size(60.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.MoreVert,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            }
+
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        AnimatedVisibility(visible = fabExpanded) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = "Check for Updates ",
+                                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                                        shadow = Shadow(
+                                                            offset = Offset(1f, 1f),
+                                                            blurRadius = 20f
+                                                        ),
+                                                        textIndent = TextIndent(0.sp),
+                                                        fontSize = 20.sp
+                                                    ),
+                                                    color = Color.White
+                                                )
+                                                FloatingActionButton(
+                                                    onClick = {
+                                                        fabExpanded = !fabExpanded
+                                                        viewModel.isUpdateAvailable.value =
+                                                            viewModel._info.version.toFloat() > BuildConfig.VERSION_NAME.toFloat()
+                                                        if (!viewModel.isUpdateAvailable.value) Toast.makeText(
+                                                            applicationContext,
+                                                            "Latest Version Installed",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    },
+                                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                    shape = CircleShape,
+                                                    modifier = Modifier.size(60.dp)
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(id = R.drawable.cloud),
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            }
+
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        AnimatedVisibility(visible = fabExpanded) {
+
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Text(
+                                                    text = "Theme ",
+                                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
+                                                        shadow = Shadow(
+                                                            offset = Offset(1f, 1f),
+                                                            blurRadius = 20f
+                                                        ),
+                                                        textIndent = TextIndent(0.sp),
+                                                        fontSize = 20.sp
+                                                    ),
+                                                    color = Color.White
+                                                )
+                                                FloatingActionButton(
+                                                    onClick = {
+                                                        fabExpanded = !fabExpanded
+                                                        themeChanger = true
+
+                                                    },
+                                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                                    shape = CircleShape,
+                                                    modifier = Modifier.size(60.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+
+                                        FloatingActionButton(
+                                            onClick = { fabExpanded = !fabExpanded },
+                                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                            shape = RoundedCornerShape(20.dp),
+                                            modifier = Modifier.size(60.dp)
+                                        ) {
+                                            var angle = animateFloatAsState(
+                                                targetValue = if (fabExpanded) 1.0F else 0F,
+                                                animationSpec = tween(durationMillis = 1000)
+                                            )
+
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = null,
+                                                modifier = Modifier.rotate(135 * angle.value)
+                                            )
+                                        }
+                                    }
+
+                                }
+                            },
+                            bottomBar = {
+                                BottomNavBar(
+                                    items = listOf(
+                                        BottomNavItem("BRAWLER", "brawler", Icons.Default.Home),
+                                        BottomNavItem("EVENTS", "events", Icons.Default.Notifications),
+                                        BottomNavItem("META", "meta", Icons.Default.Face),
+                                        BottomNavItem("STATS", "tracker", Icons.Default.MoreVert)
+                                    ),
+                                    navController = navController,
+                                    onItemClicked = {
+                                        tabCurrent = it.route
+                                        isSearch = false
+                                        value = ""
+                                        viewModel.isSearching.value = false
+                                        viewModel.find(value.lowercase())
+                                        navController.navigate(it.route)
+                                    }
+                                )
+                            }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(
+                                        top = it.calculateTopPadding(),
+                                        bottom = it.calculateBottomPadding()
+                                    )
+                                    .background(MaterialTheme.colorScheme.background)
+                            )
+                            {
+                                Navigation(navController = navController, tag,viewModel) {
+                                    tag = it
+                                }
+
+
+                                if (viewModel.isUpdateAvailable.value) {
+                                    Update(viewModel, applicationContext)
+                                }
+                                if (themeChanger) {
+                                    AlertDialog(onDismissRequest = { themeChanger = false }) {
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(
+                                                    RoundedCornerShape(20.dp)
+                                                )
+                                                .background(
+                                                    MaterialTheme.colorScheme.tertiaryContainer
+                                                )
+                                                .fillMaxWidth()
+                                                .padding(20.dp)
+
+                                        ) {
+                                            Column {
+                                                Text(
+                                                    text = "Choose theme",
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    fontSize = 25.sp
+                                                )
+                                                Spacer(modifier = Modifier.height(5.dp))
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .clickable {
+                                                            themeChanger = false
+                                                            themeMode = 0
+                                                        }
+                                                ) {
+                                                    Text(
+                                                        text = "Dark",
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 18.sp
+                                                    )
+                                                    if (themeMode == 0) Icon(
+                                                        Icons.Default.Check,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.height(5.dp))
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .clickable {
+                                                            themeChanger = false
+                                                            themeMode = 1
+                                                        }
+                                                ) {
+                                                    Text(
+                                                        text = "Light",
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 18.sp
+                                                    )
+                                                    if (themeMode == 1) Icon(
+                                                        Icons.Default.Check,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.height(5.dp))
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .clickable {
+                                                                themeChanger = false
+                                                                themeMode = 2
+                                                            }
+                                                    ) {
+                                                        Text(
+                                                            text = "Dynamic",
+                                                            fontWeight = FontWeight.Bold,
+                                                            fontSize = 18.sp
+                                                        )
+                                                        if (themeMode == 2) Icon(
+                                                            Icons.Default.Check,
+                                                            contentDescription = null
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }//
+//                    }
+//                    composable("preview"){
+//                        var vm = viewModel<SceneViewModel>()
+//                        viewModel.previewBrawler.value?.let { it1 -> Preview3D(brawler = it1, context = applicationContext, viewModel = vm ) }
+//                    }
+//
+//                }
+
             }
         }
 
     }
 
     @Composable
-    fun Navigation(navController: NavHostController, tag: String?, send: (String) -> Unit) {
-        val viewModel = viewModel<MainViewModel>()
+    fun Navigation(navController: NavHostController, tag: String?,viewModel: MainViewModel, send: (String) -> Unit) {
+        //val viewModel = viewModel<MainViewModel>()
         val brawlers = viewModel.blist.value
         val meta = viewModel.nestedList.value
         val isLoading = viewModel.isLoading.value
@@ -658,7 +678,7 @@ class MainActivity : ComponentActivity() {
                         Box(
                             Modifier.fillMaxSize(),
                             contentAlignment = Center
-                        ) { CircularProgressIndicator() }
+                        ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground, strokeCap = StrokeCap.Round) }
                     } else if (viewModel.isLoadingStats.value == 1) SetTrackerData(viewModel)
                     else {
                         Box(
@@ -845,20 +865,26 @@ fun BottomNavBar(
                                 Icon(
                                     imageVector = it.icon,
                                     contentDescription = it.name,
-                                    modifier = Modifier.size(if(selected)15.dp else 20.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
-                                if (selected) Text(
-                                    text = it.name,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = 8.sp
-                                )
+
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.onTertiaryContainer,
                             unselectedIconColor = MaterialTheme.colorScheme.onTertiaryContainer,
                             indicatorColor = MaterialTheme.colorScheme.tertiaryContainer
-                        )
+                        ),
+                        label = {
+                            Text(
+                                text = it.name,
+                                textAlign = TextAlign.Center,
+                                fontSize = 10.sp,
+                                lineHeight = 10.sp,
+                                color = if(selected)MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                            )
+                        },
+                        alwaysShowLabel = true
                     )
                 }
             }
@@ -1215,7 +1241,7 @@ fun SetDataMap(
                                 )
                             )
                             Text(
-                                text = "${dayLeft}d ${hourLeft}h",
+                                text =if(hourLeft+13>=24) "${dayLeft+1}d ${(hourLeft+13)%24}h" else "${dayLeft}d ${hourLeft+13}h",
                                 style = MaterialTheme.typography.bodyMedium + TextStyle(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                     textIndent = TextIndent(0.sp),
@@ -1228,10 +1254,14 @@ fun SetDataMap(
                 }
             }
         } else {
-            val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
+            val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value).plus(46800000)
+            val difTimeCg = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
+            val dayLeftCg = difTimeCg / 86400000
+            var hourLeftCg = (difTimeCg % 86400000) / 3600000
+            var minLeftCg = ((difTimeCg % 86400000) % 3600000) / 60000
             val dayLeft = difTime / 86400000
-            val hourLeft = (difTime % 86400000) / 3600000
-            val minLeft = ((difTime % 86400000) % 3600000) / 60000
+            var hourLeft = (difTime % 86400000) / 3600000
+            var minLeft = ((difTime % 86400000) % 3600000) / 60000
 
             val clEvent = listOf(
                 clubleague(1, "EVENT DAY 1", 0, "Preparation !"),
@@ -1242,7 +1272,7 @@ fun SetDataMap(
                 clubleague(6, "EVENT DAY 3", 6, "Compete with your club!"),
                 clubleague(7, "EVENT ENDED", 0, "Club Games will start soon!")
             )
-            val day = 7 - dayLeft - 1
+            var day=7 - dayLeft - 1
             Card(
                 Modifier
                     .weight(2.2f)
@@ -1273,7 +1303,7 @@ fun SetDataMap(
                             modifier = Modifier.align(TopStart)
                         )
                         Text(
-                            text = if (day == 6L) "ENDED" else "${hourLeft}h ${minLeft}m",
+                            text = if (day == 6L) "ENDED" else "${if(day==-1L) hourLeft+24 else hourLeft}h ${minLeft}m",
                             modifier = Modifier
                                 .align(
                                     BottomEnd
@@ -1304,7 +1334,7 @@ fun SetDataMap(
                             Spacer(modifier = Modifier.width(10.dp))
                             Column(modifier = Modifier.align(Bottom)) {
                                 Text(
-                                    clEvent[day.toInt()].name, color = Color.White,
+                                    clEvent[if(day==-1L)0 else day.toInt()].name, color = Color.White,
                                     style = MaterialTheme.typography.bodyMedium + TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                         textIndent = TextIndent(0.sp),
@@ -1312,7 +1342,7 @@ fun SetDataMap(
                                     ), modifier = Modifier.offset(y = (4).dp)
                                 )
                                 Text(
-                                    clEvent[day.toInt()].text, color = Color.White,
+                                    clEvent[if(day==-1L)0 else day.toInt()].text, color = Color.White,
                                     style = MaterialTheme.typography.bodyMedium + TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                         textIndent = TextIndent(0.sp),
@@ -1322,7 +1352,7 @@ fun SetDataMap(
                                 Spacer(modifier = Modifier.height(3.dp))
                             }
                         }
-                        if (clEvent[day.toInt()].ticket != 0) {
+                        if (clEvent[if(day==-1L)0 else day.toInt()].ticket != 0) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.align(CenterEnd)
@@ -1334,7 +1364,7 @@ fun SetDataMap(
                                         .size(30.dp)
                                 )
                                 Text(
-                                    text = " x${clEvent[day.toInt()].ticket}", color = Color.White,
+                                    text = " x${clEvent[if(day==-1L)0 else day.toInt()].ticket}", color = Color.White,
                                     style = MaterialTheme.typography.bodyMedium + TextStyle(
                                         shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                         textIndent = TextIndent(0.sp),
@@ -1356,7 +1386,7 @@ fun SetDataMap(
                                 )
                             )
                             Text(
-                                text = "${dayLeft}d ${hourLeft}h",
+                                text = if(dayLeftCg!=0L)"${dayLeftCg}d ${hourLeftCg}h" else "0d ${hourLeftCg}h ${minLeftCg}m",
                                 style = MaterialTheme.typography.bodyMedium + TextStyle(
                                     shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
                                     textIndent = TextIndent(0.sp),
