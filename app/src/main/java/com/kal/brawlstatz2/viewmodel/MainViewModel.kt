@@ -74,13 +74,13 @@ class MainViewModel : ViewModel() {
     val _changelog : ArrayList<String> = ArrayList()
     val changelog: MutableState<List<String>> = mutableStateOf(listOf())
 
-    var _tracker :Profile= Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","",""),"",
-        Victories("","","",""), League("","",""),"","","", arrayListOf(), arrayListOf(),
-        arrayListOf()
+    var _tracker :Profile= Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","","",""),"",
+        Victories("","","",""), League("","",""),"",0,0, arrayListOf(), arrayListOf(),
+        arrayListOf(),"","",""
     )
-    val tracker : MutableState<Profile> = mutableStateOf(Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","",""),"",
-        Victories("","","",""), League("","",""), "","","",arrayListOf(), arrayListOf(),
-        arrayListOf()
+    val tracker : MutableState<Profile> = mutableStateOf(Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","","",""),"",
+        Victories("","","",""), League("","",""), "",0,0,arrayListOf(), arrayListOf(),
+        arrayListOf(),"","",""
     ))
 
 
@@ -107,7 +107,7 @@ class MainViewModel : ViewModel() {
         isLoadingStats.value=0
         val retrofit = Retrofit.Builder()
             .addConverterFactory(ScalarsConverterFactory.create())
-            .baseUrl("https://brawlstats.com/")
+            .baseUrl("https://brawlace.com/")
             .build()
         val coroutineExceptionHandler = CoroutineExceptionHandler{_, throwable ->
             throwable.printStackTrace()
@@ -116,120 +116,117 @@ class MainViewModel : ViewModel() {
         val api = retrofit.create(Api::class.java)
 
         CoroutineScope(Dispatchers.IO+coroutineExceptionHandler).launch {
-            _tracker=Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","",""),"",
-                Victories("","","",""), League("","",""),"","","", arrayListOf(), arrayListOf(),
-                arrayListOf()
+            _tracker=Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","","",""),"",
+                Victories("","","",""), League("","",""),"",0,0, arrayListOf(), arrayListOf(),
+                arrayListOf(),"","",""
             )
-            tracker.value=Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","",""),"",
-                Victories("","","",""), League("","",""),"","","", arrayListOf(), arrayListOf(),
-                arrayListOf()
+            tracker.value=Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","","",""),"",
+                Victories("","","",""), League("","",""),"",0,0, arrayListOf(), arrayListOf(),
+                arrayListOf(),"","",""
             )
             _tracker.brawler.clear()
             _tracker.battleLog.clear()
             _tracker.prevClubs.clear()
-            val result = api.getPageResponse("profile/${tag.trim().uppercase()}")
+            val result = api.getPageResponse("players/%23${tag.trim().uppercase()}")
 
             val htmlDoc = Jsoup.parse(result.body().toString())
-            _tracker.name = htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv yVyPKdb4lsiRak5TAnxs3").text()
-            _tracker.dp = htmlDoc.getElementsByClass("_2WiT9pX8A8he7myBSNAOG0").attr("src")
-            _tracker.tag = htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _3NYHHzDqmBNLGrVIYwg8ar").text()
-            _tracker.player_club.clubNane = htmlDoc.getElementsByClass("B8JVqDspQwEhSSEQL5R3k")[0].text()
-            _tracker.player_club.clubBanner=htmlDoc.getElementsByClass("_10NE7YpQTAq_Eh89NXDUyw").attr("src")
-            _tracker.player_club.clubLink=htmlDoc.getElementsByClass("B8JVqDspQwEhSSEQL5R3k").attr("href")
-            _tracker.xp.level = htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _2gcTtONLJ8B_iB1IzpYg51").text()
-            _tracker.xp.progress = htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1IVG5wQ6FsDh26OcvvGzDd")[0].text()
-            _tracker.trophy.progress = htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1IVG5wQ6FsDh26OcvvGzDd")[1].text()
-            _tracker.trophy.highest=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv")[6].text()
-            _tracker.trophy.seasonEnd=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv")[8].text()
-            _tracker.trophy.trophyImg=htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").substring(
-                htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").indexOf("(")+1,
-                htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").lastIndexOf(")")
-            ).replace("'","").replace("\"","")
+            _tracker.name = htmlDoc.getElementsByClass("pt-3").text()
+            _tracker.dp = htmlDoc.getElementsByClass("pt-3").select("img").attr("src")
+            _tracker.tag = htmlDoc.getElementsByClass("badge bg-black").text()
+            _tracker.player_club.clubNane = htmlDoc.getElementsByClass("text-center py-3").select("h4 a").text()
+//            _tracker.player_club.clubBanner=htmlDoc.getElementsByClass("_10NE7YpQTAq_Eh89NXDUyw").attr("src")
+            _tracker.player_club.clubLink=htmlDoc.getElementsByClass("text-center py-3").select("h4 a").attr("href")
+            println(_tracker.player_club.clubLink)
+            _tracker.xp.level = htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[0].text()
+//            _tracker.xp.progress = htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1IVG5wQ6FsDh26OcvvGzDd")[0].text()
+            _tracker.trophy.progress = htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[1].text()
+            _tracker.trophy.highest=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[2].text()
+            _tracker.trophy.seasonEnd=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[3].text()
+//            _tracker.trophy.trophyImg=htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").substring(
+//                htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").indexOf("(")+1,
+//                htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").lastIndexOf(")")
+//            ).replace("'","").replace("\"","")
+//
+//            _tracker.league.highestSoloImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[0].attr("src")
+//            _tracker.league.highestTeamImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[1].attr("src")
+//            _tracker.league.highestClubImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[2].attr("src")
+//
+            _tracker.trophy.seasonEndReward=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[4].text()
+            _tracker.victories.team3v3=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[5].text()
+            _tracker.victories.solo=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[6].text()
+            _tracker.victories.duo=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[7].text()
+            var gt = htmlDoc.getElementsByClass("list-group-item")[0].text()
+            _tracker.gadgets = gt.substring(gt.indexOf("-")+1).trim()
+            gt = htmlDoc.getElementsByClass("list-group-item")[1].text()
+            _tracker.starpowers = gt.substring(gt.indexOf("-")).trim()
+            gt = htmlDoc.getElementsByClass("list-group-item")[2].text()
+            _tracker.gears = gt.substring(gt.indexOf("-")+1).trim()
 
-            _tracker.league.highestSoloImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[0].attr("src")
-            _tracker.league.highestTeamImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[1].attr("src")
-            _tracker.league.highestClubImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[2].attr("src")
-
-
-            _tracker.victories.team3v3=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv")[20].text()
-            _tracker.victories.solo=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv")[22].text()
-            _tracker.victories.duo=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv")[24].text()
-            _tracker.victories.challenge=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv")[26].text()
-
-            _tracker.main=htmlDoc.getElementsByClass("_1GD0N7zUCHGC-DPfl9jSxR")[0].attr("style").substring(
-                htmlDoc.getElementsByClass("_1GD0N7zUCHGC-DPfl9jSxR")[0].attr("style").indexOf("(")+1,
-                htmlDoc.getElementsByClass("_1GD0N7zUCHGC-DPfl9jSxR")[0].attr("style").lastIndexOf(")")
-            ).replace("'","").replace("\"","")
-
-
-            var index=0
-            var isjoin = true
-            for (i in htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv")) {
-                if(i.text().contains("/")||i.text().contains("Current Club")){
-                    if(isjoin) {
-                        _tracker.prevClubs.add(PlayerClub("","","","",""))
-                        _tracker.prevClubs[(index/2)].joinDate= i.text().replace(" ","")
-                        isjoin=false
-                    }
-                    else{
-                        _tracker.prevClubs[(index/2)].leaveDate= i.text().replace(" ","")
-                        isjoin=true
-                    }
-                    index++;
+            var loss=0;
+            var win=0;
+            var bg ="#19d800"
+            for(i in htmlDoc.getElementsByClass("my-3 text-center").select("a")){
+                if(i.className().contains("light-red")){
+                    bg="#e13b1e"
+                    loss++
                 }
-                if(i.text().startsWith('W')&&i.text()[1].isDigit()) _tracker.bwin=i.text()
-                if(i.text().startsWith('L')&&i.text()[1].isDigit()) _tracker.bloss=i.text()
+                else if(i.className().contains("light-green")){
+                    bg="#19d800"
+                    win++
+                }
+                else bg="#00a3ff"
+                _tracker.battleLog.add(BattleResult(bg,i.select("img").attr("src")))
             }
-            for(i in htmlDoc.getElementsByClass("_3JZISxMCErxeBeOU8f6YEL _3DB1wYyU6xJ5NQ8ggxM5Z")){
-                _tracker.battleLog.add(BattleResult(i.attr("style").substring(i.attr("style").indexOf("#")).replace(";",""),i.child(0).attr("src")))
-            }
+            _tracker.bloss=loss
+            _tracker.bwin=win
             var ox =0
-            for (i in htmlDoc.getElementsByClass("_27S49vkmDiNCJywFvwR4qe")){
+            for (i in htmlDoc.getElementById("brawlersOwnedTable")?.select("tbody tr")!!){
                 _tracker.brawler.add(BrawlerStats(
-                    i.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _2PpbIDdt21EWrSBydkeVF4").text(),
-                    i.getElementsByClass("_3lIy17lrmmxtESKJWD9ci4").attr("src"),
-                    i.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _2__aet5G124QK1Wcdy2Aa-").text(),
-                    i.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG")[3].text(),
-                    i.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG")[5].text(),
-                    i.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG")[7].text(),
-                    "",
+                    i.select("td")[0].text(),
+                    "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + i.select("td")[0].text().lowercase() + "%2F" + i.select("td")[0].text()[0]+i.select("td")[0].text().substring(1).lowercase() + ".webp?alt=media&token=",
+                    i.select("td")[2].text(),
+                    i.select("td")[1].text(),
+                    i.select("td")[3].text(),
+                    i.select("td")[4].text(),
+                    arrayListOf(),
                     arrayListOf()
                 ))
-                _tracker.brawler[ox].unlocked.clear()
-                for (img in i.getElementsByClass("_2jWkKEvTH-ymjiategHCUE")){
-                    _tracker.brawler[ox].unlocked.add(img.attr("src"))
+                for(j in i.select(".icon-tiny") ){
+                    val url = j.attr("src")
+                    if(url.contains("gears")) _tracker.brawler[ox].gears.add(url)
+                    else _tracker.brawler[ox].gdst.add(url)
                 }
+
                 ox++
-
             }
-            var ix =0
-            for(bg in htmlDoc.getElementsByClass("_13DuW1ZxcgxBsiEQ3xfgMm")){
-                var bgc=""
-                if(bg.attr("style").contains("#")) bgc=bg.attr("style").substring(bg.attr("style").indexOf('#')).replace(";","")
-                else bgc="#f3902d"
-
-                _tracker.brawler[ix].bg=bgc
-                ix++
-            }
-            _tracker.updated=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1WcgIMQLXx7DHn09FyXAwj").text()
-            var clubin=0
-            for( i in htmlDoc.getElementsByClass("_2F_JwG9U9Kz7NnFPeDmpL7")){
-                _tracker.prevClubs[clubin].clubLink=i.attr("href")
-                clubin++
-            }
-            var clubin1=0
-            for(i in htmlDoc.getElementsByClass("_3Ag9fZpyBrTpLIc_qjtvgo")){
-                _tracker.prevClubs[clubin1].clubBanner=i.attr("src")
-                clubin1++
-
-            }
-            var clubin2=0
-            for(i in htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1O-vM3JfUX0P5_dwNNu6lm")){
-                _tracker.prevClubs[clubin2].clubNane=i.text()
-                clubin2++
-
-            }
-
+//            var ix =0
+//            for(bg in htmlDoc.getElementsByClass("_13DuW1ZxcgxBsiEQ3xfgMm")){
+//                var bgc=""
+//                if(bg.attr("style").contains("#")) bgc=bg.attr("style").substring(bg.attr("style").indexOf('#')).replace(";","")
+//                else bgc="#f3902d"
+//
+//                _tracker.brawler[ix].bg=bgc
+//                ix++
+//            }
+//            _tracker.updated=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1WcgIMQLXx7DHn09FyXAwj").text()
+//            var clubin=0
+//            for( i in htmlDoc.getElementsByClass("_2F_JwG9U9Kz7NnFPeDmpL7")){
+//                _tracker.prevClubs[clubin].clubLink=i.attr("href")
+//                clubin++
+//            }
+//            var clubin1=0
+//            for(i in htmlDoc.getElementsByClass("_3Ag9fZpyBrTpLIc_qjtvgo")){
+//                _tracker.prevClubs[clubin1].clubBanner=i.attr("src")
+//                clubin1++
+//
+//            }
+//            var clubin2=0
+//            for(i in htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1O-vM3JfUX0P5_dwNNu6lm")){
+//                _tracker.prevClubs[clubin2].clubNane=i.text()
+//                clubin2++
+//
+//            }
+            _tracker.main="https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + _tracker.brawler[0].name.lowercase() + "%2F" + _tracker.brawler[0].name[0] + _tracker.brawler[0].name.substring(1).lowercase() + "_Skin-Default.webp?alt=media&token"
             isLoadingStats.value=1
 
             tracker.value = _tracker
@@ -503,17 +500,17 @@ class MainViewModel : ViewModel() {
                         if (brawler != null) {
                             brawler.classType = DataSnap.child("class").value as String
                             brawler.bpro =
-                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname!!.lowercase() + "%2F" + DataSnap.key + ".webp?alt=media&token="+brawler.zver
+                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname!!.lowercase() + "%2F" + brawler.bname[0]+brawler.bname.substring(1).lowercase() + ".webp?alt=media&token="+brawler.zver
                             brawler.bmodel =
-                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2F" + DataSnap.key + "_Skin-Default.webp?alt=media&token="+brawler.zver
+                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2F" + brawler.bname[0]+brawler.bname.substring(1).lowercase() + "_Skin-Default.webp?alt=media&token="+brawler.zver
                             brawler.g1 =
-                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FGD-" + DataSnap.key + "1.webp?alt=media&token="+brawler.zver
+                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FGD-" + brawler.bname[0]+brawler.bname.substring(1).lowercase() + "1.webp?alt=media&token="+brawler.zver
                             brawler.g2 =
-                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FGD-" + DataSnap.key + "2.webp?alt=media&token="+brawler.zver
+                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FGD-" + brawler.bname[0]+brawler.bname.substring(1).lowercase() + "2.webp?alt=media&token="+brawler.zver
                             brawler.s1 =
-                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FSP-" + DataSnap.key + "1.webp?alt=media&token="+brawler.zver
+                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FSP-" + brawler.bname[0]+brawler.bname.substring(1).lowercase() + "1.webp?alt=media&token="+brawler.zver
                             brawler.s2 =
-                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FSP-" + DataSnap.key + "2.webp?alt=media&token="+brawler.zver
+                                "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2FSP-" + brawler.bname[0]+brawler.bname.substring(1).lowercase() + "2.webp?alt=media&token="+brawler.zver
                             if (brawler.c1n != null) brawler.c1 =
                                 "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.c1n.lowercase() + "%2F" + brawler.c1n[0] + brawler.c1n.substring(1).lowercase() + ".webp?alt=media&token="+brawler.zver
                             if (brawler.c2n != null) brawler.c2 =
@@ -528,7 +525,7 @@ class MainViewModel : ViewModel() {
                                 "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/gears%2F" + brawler.bgear2?.lowercase() + ".webp?alt=media&token="+brawler.zver
                             if (brawler.bgear3 != null) brawler.bgear3 =
                                 "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/gears%2F" + brawler.bgear3!!.lowercase() + ".webp?alt=media&token="+brawler.zver
-                            brawler.model ="https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2F" + DataSnap.key + "Model.glb?alt=media&token="+brawler.zver
+                            brawler.model ="https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + brawler.bname.lowercase() + "%2F" +  brawler.bname[0]+brawler.bname.substring(1).lowercase()  + "Model.glb?alt=media&token="+brawler.zver
                             when(brawler.brare){
                                 "LEGENDARY" -> brawler.color= legendary
                                 "MYTHIC" -> brawler.color= mythic

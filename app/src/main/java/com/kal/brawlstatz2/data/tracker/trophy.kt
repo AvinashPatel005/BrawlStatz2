@@ -4,5 +4,6 @@ data class Trophy(
     var trophyImg :String,
     var progress: String,
     var highest: String,
-    var seasonEnd: String
+    var seasonEnd: String,
+    var seasonEndReward:String
 )

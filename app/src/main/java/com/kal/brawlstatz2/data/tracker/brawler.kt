@@ -1,5 +1,7 @@
 package com.kal.brawlstatz2.data.tracker
 
+import androidx.compose.ui.graphics.Color
+
 data class BrawlerStats(
     var name:String,
     var pro:String,
@@ -7,6 +9,6 @@ data class BrawlerStats(
     var level:String,
     var currTrophy: String,
     var highTrophy: String,
-    var bg : String,
-    var unlocked:ArrayList<String>
+    var gears:ArrayList<String>,
+    var gdst:ArrayList<String>
 )
