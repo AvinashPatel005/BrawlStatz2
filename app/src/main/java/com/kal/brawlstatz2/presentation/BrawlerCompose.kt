@@ -111,7 +111,7 @@ fun BrawlersList(brawler: List<Brawler>, isSearching: Boolean, viewModel: MainVi
             }
         }
         LazyColumn(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(topEnd = 20.dp, topStart = 20.dp))
         ) {
             items(brawler) {
                 BrawlerCard(brawler = it, cardModel,viewModel)

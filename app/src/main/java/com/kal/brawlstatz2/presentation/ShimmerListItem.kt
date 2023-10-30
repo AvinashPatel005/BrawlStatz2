@@ -16,6 +16,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -28,7 +31,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
@@ -41,6 +46,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.GlideImage
+import com.kal.brawlstatz2.R
 import java.util.concurrent.TimeUnit
 
 @Composable
@@ -91,7 +97,10 @@ fun ShimmerListItem(
 fun ShimmerListItem1(
     modifier: Modifier = Modifier
 ) {
-    Column(Modifier.padding(6.dp).alpha(0.3f)) {
+    Column(
+        Modifier
+            .padding(6.dp)
+            .alpha(0.3f)) {
         Row(Modifier.weight(3.1f)) {
             Box(modifier = Modifier
                 .fillMaxWidth(0.5f)
@@ -177,6 +186,28 @@ fun ShimmerListItem2(
         }
 
     }
+}
+
+@Composable
+fun TrackerShimmer(
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxSize()
+        ) {
+        val transition = rememberInfiniteTransition()
+        val startOffsetX by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 1000)
+            )
+        )
+        Icon(painter = painterResource(id = R.drawable.logo_splash), contentDescription =null ,Modifier.size(100.dp).align(
+            Alignment.Center).rotate(startOffsetX))
+    }
+
 }
 
 fun Modifier.shimmerEffect() : Modifier = composed {

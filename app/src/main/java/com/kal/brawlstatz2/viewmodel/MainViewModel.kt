@@ -43,6 +43,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.lang.Exception
+import kotlin.math.ceil
 import kotlin.math.log
 
 class MainViewModel : ViewModel() {
@@ -75,12 +76,12 @@ class MainViewModel : ViewModel() {
     val changelog: MutableState<List<String>> = mutableStateOf(listOf())
 
     var _tracker :Profile= Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","","",""),"",
-        Victories("","","",""), League("","",""),"",0,0, arrayListOf(), arrayListOf(),
-        arrayListOf(),"","",""
+        Victories("","","",""), League("","",""),"",0,0,0, arrayListOf(), arrayListOf(),
+        arrayListOf(),arrayListOf(),"","","",0
     )
     val tracker : MutableState<Profile> = mutableStateOf(Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","","",""),"",
-        Victories("","","",""), League("","",""), "",0,0,arrayListOf(), arrayListOf(),
-        arrayListOf(),"","",""
+        Victories("","","",""), League("","",""), "",0,0,0,arrayListOf(), arrayListOf(),
+        arrayListOf(),arrayListOf(),"","","",0
     ))
 
 
@@ -88,11 +89,9 @@ class MainViewModel : ViewModel() {
     val bp: MutableState<List<String>> = mutableStateOf(listOf())
     val _pl :ArrayList<String> = ArrayList()
     val pl: MutableState<List<String>> = mutableStateOf(listOf())
-    val _cl :ArrayList<String> = ArrayList()
-    val cl: MutableState<List<String>> = mutableStateOf(listOf())
     var timeFromServer : MutableState<Long> = mutableLongStateOf(0)
     var metaVer : MutableState<String> = mutableStateOf("")
-
+    var megaPig : MutableState<Long> = mutableLongStateOf(0L)
     init {
         appUpdater()
         fetchData()
@@ -117,12 +116,12 @@ class MainViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO+coroutineExceptionHandler).launch {
             _tracker=Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","","",""),"",
-                Victories("","","",""), League("","",""),"",0,0, arrayListOf(), arrayListOf(),
-                arrayListOf(),"","",""
+                Victories("","","",""), League("","",""),"",0,0,0, arrayListOf(), arrayListOf(),
+                arrayListOf(),arrayListOf(),"","","",0
             )
             tracker.value=Profile("","","", PlayerClub("","","","",""), Xp("","0/1"), Trophy("","0/1","","",""),"",
-                Victories("","","",""), League("","",""),"",0,0, arrayListOf(), arrayListOf(),
-                arrayListOf(),"","",""
+                Victories("","","",""), League("","",""),"",0,0,0, arrayListOf(), arrayListOf(),
+                arrayListOf(),arrayListOf(),"","","",0
             )
             _tracker.brawler.clear()
             _tracker.battleLog.clear()
@@ -134,23 +133,14 @@ class MainViewModel : ViewModel() {
             _tracker.dp = htmlDoc.getElementsByClass("pt-3").select("img").attr("src")
             _tracker.tag = htmlDoc.getElementsByClass("badge bg-black").text()
             _tracker.player_club.clubNane = htmlDoc.getElementsByClass("text-center py-3").select("h4 a").text()
-//            _tracker.player_club.clubBanner=htmlDoc.getElementsByClass("_10NE7YpQTAq_Eh89NXDUyw").attr("src")
+
             _tracker.player_club.clubLink=htmlDoc.getElementsByClass("text-center py-3").select("h4 a").attr("href")
             println(_tracker.player_club.clubLink)
             _tracker.xp.level = htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[0].text()
-//            _tracker.xp.progress = htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1IVG5wQ6FsDh26OcvvGzDd")[0].text()
             _tracker.trophy.progress = htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[1].text()
             _tracker.trophy.highest=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[2].text()
             _tracker.trophy.seasonEnd=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[3].text()
-//            _tracker.trophy.trophyImg=htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").substring(
-//                htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").indexOf("(")+1,
-//                htmlDoc.getElementsByClass("_1q57V5vKLuzJ4g6BkfpZbk")[1].attr("style").lastIndexOf(")")
-//            ).replace("'","").replace("\"","")
-//
-//            _tracker.league.highestSoloImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[0].attr("src")
-//            _tracker.league.highestTeamImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[1].attr("src")
-//            _tracker.league.highestClubImg=htmlDoc.getElementsByClass("DPUFH-EhiGBBrkki4Gsaf")[2].attr("src")
-//
+
             _tracker.trophy.seasonEndReward=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[4].text()
             _tracker.victories.team3v3=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[5].text()
             _tracker.victories.solo=htmlDoc.getElementsByClass("table table-sm table-hover table-bordered").select("tbody tr td")[6].text()
@@ -158,13 +148,21 @@ class MainViewModel : ViewModel() {
             var gt = htmlDoc.getElementsByClass("list-group-item")[0].text()
             _tracker.gadgets = gt.substring(gt.indexOf("-")+1).trim()
             gt = htmlDoc.getElementsByClass("list-group-item")[1].text()
-            _tracker.starpowers = gt.substring(gt.indexOf("-")).trim()
+            _tracker.starpowers = gt.substring(gt.indexOf("-")+1).trim()
             gt = htmlDoc.getElementsByClass("list-group-item")[2].text()
             _tracker.gears = gt.substring(gt.indexOf("-")+1).trim()
+            try{
+                _tracker.trophyArray= htmlDoc.select(".row .col-md-6")[1].toString().replace(" ","").substringAfter("\"data\":[").substringBefore("]").split(",").map { it.toInt() } as ArrayList<Int>
+            }
+            catch (_:Exception){
+                _tracker.trophyArray= "0,0".replace(" ","").substringAfter("\"data\":[").substringBefore("]").split(",").map { it.toInt() } as ArrayList<Int>
+
+            }
 
             var loss=0;
             var win=0;
-            var bg ="#19d800"
+            var draw=0;
+            var bg:String
             for(i in htmlDoc.getElementsByClass("my-3 text-center").select("a")){
                 if(i.className().contains("light-red")){
                     bg="#e13b1e"
@@ -174,58 +172,37 @@ class MainViewModel : ViewModel() {
                     bg="#19d800"
                     win++
                 }
-                else bg="#00a3ff"
+                else {
+                    bg="#00a3ff"
+                    draw++
+                }
+
                 _tracker.battleLog.add(BattleResult(bg,i.select("img").attr("src")))
             }
             _tracker.bloss=loss
             _tracker.bwin=win
+            _tracker.bdraw=draw
             var ox =0
             for (i in htmlDoc.getElementById("brawlersOwnedTable")?.select("tbody tr")!!){
                 _tracker.brawler.add(BrawlerStats(
                     i.select("td")[0].text(),
                     "https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + i.select("td")[0].text().lowercase() + "%2F" + i.select("td")[0].text()[0]+i.select("td")[0].text().substring(1).lowercase() + ".webp?alt=media&token=",
-                    i.select("td")[2].text(),
+                    i.select("td")[2].select("img").attr("src").toString(),
                     i.select("td")[1].text(),
                     i.select("td")[3].text(),
                     i.select("td")[4].text(),
+                    i.select("td")[5].text(),
                     arrayListOf(),
                     arrayListOf()
                 ))
+                if (_tracker.brawler[ox].level=="11") _tracker.maxBrawler++
                 for(j in i.select(".icon-tiny") ){
                     val url = j.attr("src")
                     if(url.contains("gears")) _tracker.brawler[ox].gears.add(url)
                     else _tracker.brawler[ox].gdst.add(url)
                 }
-
                 ox++
             }
-//            var ix =0
-//            for(bg in htmlDoc.getElementsByClass("_13DuW1ZxcgxBsiEQ3xfgMm")){
-//                var bgc=""
-//                if(bg.attr("style").contains("#")) bgc=bg.attr("style").substring(bg.attr("style").indexOf('#')).replace(";","")
-//                else bgc="#f3902d"
-//
-//                _tracker.brawler[ix].bg=bgc
-//                ix++
-//            }
-//            _tracker.updated=htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1WcgIMQLXx7DHn09FyXAwj").text()
-//            var clubin=0
-//            for( i in htmlDoc.getElementsByClass("_2F_JwG9U9Kz7NnFPeDmpL7")){
-//                _tracker.prevClubs[clubin].clubLink=i.attr("href")
-//                clubin++
-//            }
-//            var clubin1=0
-//            for(i in htmlDoc.getElementsByClass("_3Ag9fZpyBrTpLIc_qjtvgo")){
-//                _tracker.prevClubs[clubin1].clubBanner=i.attr("src")
-//                clubin1++
-//
-//            }
-//            var clubin2=0
-//            for(i in htmlDoc.getElementsByClass("_3lMfMVxY-knKo2dnVHMCWG _21sSMvccqXG6cJU-5FNqzv _1O-vM3JfUX0P5_dwNNu6lm")){
-//                _tracker.prevClubs[clubin2].clubNane=i.text()
-//                clubin2++
-//
-//            }
             _tracker.main="https://firebasestorage.googleapis.com/v0/b/brawlstatz2-7dd0c.appspot.com/o/brawlers%2F" + _tracker.brawler[0].name.lowercase() + "%2F" + _tracker.brawler[0].name[0] + _tracker.brawler[0].name.substring(1).lowercase() + "_Skin-Default.webp?alt=media&token"
             isLoadingStats.value=1
 
@@ -248,38 +225,28 @@ class MainViewModel : ViewModel() {
             }
 
         })
-        FirebaseDatabase.getInstance().getReference("clubleague").addValueEventListener(object : ValueEventListener{
+        var _megaPig:Long=0;
+        FirebaseDatabase.getInstance().getReference("megaPig").addValueEventListener(object : ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-                _cl.clear()
-
-
-                for(child in snapshot.children){
-                    _cl.add(child.value.toString())
-                }
-                cl.value=_cl
-                val diff1 = (timeFromServer.value-cl.value[0].toLong())
+                _megaPig = snapshot.child("endtimestamp").value as Long
+                megaPig.value=_megaPig
+                val diff1 = (timeFromServer.value-megaPig.value)
                 val diff = diff1/86400000
+                println("S $diff1")
+                println("Sasdssss $diff")
+                println(timeFromServer.value)
                 if(diff1>=0){
-                    if( diff<7){
-                        Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+7*86400000)
-                        Firebase.database.getReference("clubleague/eventname").setValue(if(cl.value[1]=="cl") "cg" else "cl")
-
-                    }
-                    else if(diff in 7..13){
-                        Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+14*86400000)
-                    }
-                    else if((diff/7)%2 == 1L ){
-                        Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+((7-diff%7)+diff)*86400000)
-                    }
-
-                    else{
-
-                        Firebase.database.getReference("clubleague/endtimestamp").setValue(cl.value[0].toLong()+((7-diff%7)+diff)*86400000)
-                        Firebase.database.getReference("clubleague/eventname").setValue(if(cl.value[1]=="cl") "cg" else "cl")
-
-                    }
+                   if(diff<28){
+                       Firebase.database.getReference("megaPig/endtimestamp").setValue(megaPig.value+2419200000)
+                       println("<28")
+                   }
+                   else{
+                       var times = ceil((diff.toDouble()+1)/28L)
+                       println("times "+times)
+                       var timeAdded= times*86400000*28
+                       Firebase.database.getReference("megaPig/endtimestamp").setValue(megaPig.value+timeAdded)
+                   }
                 }
-
             }
 
             override fun onCancelled(error: DatabaseError) {

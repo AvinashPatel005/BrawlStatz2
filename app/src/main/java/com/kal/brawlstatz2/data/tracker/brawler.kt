@@ -9,6 +9,7 @@ data class BrawlerStats(
     var level:String,
     var currTrophy: String,
     var highTrophy: String,
+    var minusTrophy: String,
     var gears:ArrayList<String>,
     var gdst:ArrayList<String>
 )

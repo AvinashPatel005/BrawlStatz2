@@ -1,11 +1,8 @@
 package com.kal.brawlstatz2.presentation
 
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,17 +16,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,42 +32,37 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.kal.brawlstatz2.R
-import com.kal.brawlstatz2.data.ExpandedUnlockedBrawler
 import com.kal.brawlstatz2.ui.theme.White2
-import com.kal.brawlstatz2.viewmodel.CardsViewModel
 import com.kal.brawlstatz2.viewmodel.MainViewModel
-import com.kal.brawlstatz2.viewmodel.UnlockedViewModel
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 
-@OptIn(ExperimentalGlideComposeApi::class, ExperimentalEncodingApi::class)
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun SetTrackerData(viewModel: MainViewModel) {
     val data = viewModel.tracker.value
-    val expansion = viewModel<UnlockedViewModel>()
     LazyColumn(Modifier.padding(8.dp)){
         item{
             Card(modifier = Modifier
                 .fillMaxWidth()
                 .height(220.dp),
-                shape = RectangleShape,
+                shape = RoundedCornerShape(bottomEnd = 20.dp, topStart = 20.dp),
                 colors = CardDefaults.cardColors(MaterialTheme.colorScheme.primaryContainer)
             ){
                 Box(){
@@ -127,12 +115,15 @@ fun SetTrackerData(viewModel: MainViewModel) {
                 }
             }
         }
-        
-//        item{
-//            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-//                Text(text = data.updated, fontSize = 14.sp)
-//            }
-//        }
+        item{
+            Row(Modifier.padding(horizontal = 14.dp, vertical = 4.dp)) {
+                Text(text = "Graph", fontWeight = FontWeight.Bold)
+            }
+        }
+        item{
+            TrophyGraph(data.trophyArray)
+        }
+
         item{
             Row(Modifier.padding(horizontal = 14.dp, vertical = 4.dp)) {
                 Text(text = "Stats", fontWeight = FontWeight.Bold)
@@ -203,7 +194,7 @@ fun SetTrackerData(viewModel: MainViewModel) {
                            }
                        }
                    }
-                   Image(painter = painterResource(id = R.drawable.ht), contentDescription = null, modifier = Modifier
+                   Image(painter = painterResource(id = R.drawable.set), contentDescription = null, modifier = Modifier
                        .align(
                            Alignment.CenterStart
                        )
@@ -234,84 +225,31 @@ fun SetTrackerData(viewModel: MainViewModel) {
                        .padding(0.dp, 4.dp))
 
                }
-//               Box(contentAlignment = Alignment.BottomCenter) {
-//                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
-//
-//                       Box(modifier = Modifier
-//                           .height(40.dp)
-//                           .fillMaxWidth()
-//                           .background(MaterialTheme.colorScheme.primaryContainer),
-//                           contentAlignment = Alignment.CenterStart){
-//                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-//                               Row() {
-//                                   Spacer(modifier = Modifier.width(35.dp))
-//                                   Text(text = "Highest Solo League", fontWeight = FontWeight.Bold)
-//                               }
-//                               Row() {
-//                                   GlideImage(model = data.league.highestSoloImg, contentDescription = null, modifier = Modifier.size(40.dp))
-//                                   Spacer(modifier = Modifier.width(10.dp))
-//                               }
-//                           }
-//                       }
-//                   }
-//                   Image(painter = painterResource(id = R.drawable.hsl), contentDescription = null, modifier = Modifier
-//                       .align(
-//                           Alignment.CenterStart
-//                       )
-//                       .size(45.dp))
-//               }
-//               Box(contentAlignment = Alignment.BottomCenter) {
-//                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
-//
-//                       Box(modifier = Modifier
-//                           .height(40.dp)
-//                           .fillMaxWidth()
-//                           .background(MaterialTheme.colorScheme.primaryContainer),
-//                           contentAlignment = Alignment.CenterStart){
-//                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-//                               Row() {
-//                                   Spacer(modifier = Modifier.width(35.dp))
-//                                   Text(text = "Highest Team League", fontWeight = FontWeight.Bold)
-//                               }
-//                               Row() {
-//                                   GlideImage(model = data.league.highestTeamImg, contentDescription = null, modifier = Modifier.size(40.dp))
-//                                   Spacer(modifier = Modifier.width(10.dp))
-//                               }
-//                           }
-//                       }
-//                   }
-//                   Image(painter = painterResource(id = R.drawable.htl), contentDescription = null, modifier = Modifier
-//                       .align(
-//                           Alignment.CenterStart
-//                       )
-//                       .size(45.dp))
-//               }
-//               Box(contentAlignment = Alignment.BottomCenter) {
-//                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
-//
-//                       Box(modifier = Modifier
-//                           .height(40.dp)
-//                           .fillMaxWidth()
-//                           .background(MaterialTheme.colorScheme.primaryContainer),
-//                           contentAlignment = Alignment.CenterStart){
-//                           Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-//                               Row() {
-//                                   Spacer(modifier = Modifier.width(35.dp))
-//                                   Text(text = "Highest Club League", fontWeight = FontWeight.Bold)
-//                               }
-//                               Row() {
-//                                   GlideImage(model = data.league.highestClubImg, contentDescription = null, modifier = Modifier.size(40.dp))
-//                                   Spacer(modifier = Modifier.width(10.dp))
-//                               }
-//                           }
-//                       }
-//                   }
-//                   Image(painter = painterResource(id = R.drawable.hcl), contentDescription = null, modifier = Modifier
-//                       .align(
-//                           Alignment.CenterStart
-//                       )
-//                       .size(45.dp))
-//               }
+               Box(contentAlignment = Alignment.BottomCenter) {
+                   Row(modifier = Modifier.padding(horizontal = 14.dp)){
+
+                       Box(modifier = Modifier
+                           .height(40.dp)
+                           .fillMaxWidth()
+                           .background(MaterialTheme.colorScheme.primaryContainer),
+                           contentAlignment = Alignment.CenterStart){
+                           Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                               Row() {
+                                   Spacer(modifier = Modifier.width(35.dp))
+                                   Text(text = "Max Brawlers", fontWeight = FontWeight.Bold)
+                               }
+                               Text(text = data.maxBrawler.toString()+"  ", fontWeight = FontWeight.Bold)
+                           }
+                       }
+                   }
+                   Image(painter = painterResource(id = R.drawable.p11), contentDescription = null, modifier = Modifier
+                       .align(
+                           Alignment.CenterStart
+                       )
+                       .size(45.dp)
+                       .padding(0.dp, 4.dp))
+
+               }
 
            }
 
@@ -512,7 +450,7 @@ fun SetTrackerData(viewModel: MainViewModel) {
                                     Spacer(modifier = Modifier.width(35.dp))
                                     Text(text = "Star Powers", fontWeight = FontWeight.Bold)
                                 }
-                                Text(text = data.trophy.seasonEndReward+"  ", fontWeight = FontWeight.Bold)
+                                Text(text = data.starpowers+"  ", fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -554,7 +492,7 @@ fun SetTrackerData(viewModel: MainViewModel) {
 
         item{
             Row(Modifier.padding(horizontal = 14.dp, vertical = 4.dp)) {
-                Text(text = "Last 25 Battles", fontWeight = FontWeight.Bold)
+                Text(text = "Last ${data.bloss+data.bwin+data.bdraw} Battles", fontWeight = FontWeight.Bold)
             }
             LazyRow(Modifier.padding(horizontal = 14.dp)){
                 items(data.battleLog){
@@ -575,7 +513,7 @@ fun SetTrackerData(viewModel: MainViewModel) {
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(text = "L"+data.bloss, fontWeight = FontWeight.Bold, color = Color.Red)
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(text = "D"+(25-data.bloss-data.bwin), fontWeight = FontWeight.Bold, color = Color(0xFF00a3ff))
+                    Text(text = "D"+(data.bdraw), fontWeight = FontWeight.Bold, color = Color(0xFF00a3ff))
                 }
             }
         }
@@ -593,8 +531,11 @@ fun SetTrackerData(viewModel: MainViewModel) {
                     Column (modifier = Modifier
                         .padding(2.dp)
                         .width(180.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)).shadow(1.dp,
-                            RectangleShape, spotColor = Color.White), verticalArrangement = Arrangement.Center){
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f))
+                        .shadow(
+                            1.dp,
+                            RectangleShape, spotColor = Color.White
+                        ), verticalArrangement = Arrangement.Center){
                         Box(modifier = Modifier
                             .fillMaxSize()
                             .border(2.dp, Color.Black)
@@ -603,6 +544,12 @@ fun SetTrackerData(viewModel: MainViewModel) {
                                 .size(70.dp)
                                 .border(2.dp, color = Color.Black)){
                                 it.placeholder(R.drawable.placeholder1)
+                            }
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.offset((-4).dp,(-2).dp
+                            )){
+                                GlideImage(
+                                    model = brawler.rank , contentDescription = null,
+                                    modifier = Modifier.size(23.dp))
                             }
                             Column(modifier = Modifier.align(Alignment.BottomEnd), horizontalAlignment = Alignment.End) {
                                 LazyRow {
@@ -614,6 +561,7 @@ fun SetTrackerData(viewModel: MainViewModel) {
                                             .padding(1.dp))
                                     }
                                 }
+
                                 LazyRow {
                                     items(brawler.gdst){url->
                                         GlideImage(model = url, contentDescription = null, modifier = Modifier
@@ -639,11 +587,18 @@ fun SetTrackerData(viewModel: MainViewModel) {
                                     Text(text = brawler.level, color = Color.White, fontSize = 14.sp)
                                 }
                             }
-                            Column {
-                                Text(text = "CURRENT", color = Color.White, fontSize = 14.sp)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(text = "CURRENT", color = Color.White, fontSize = 14.sp, textAlign = TextAlign.Center)
                                 Row  (verticalAlignment = Alignment.CenterVertically){
                                     Image(painter = painterResource(id = R.drawable.ht), contentDescription = null, modifier = Modifier.size(20.dp))
-                                    Text(text = brawler.currTrophy, color = Color.White, fontSize = 14.sp)
+                                    Text(text = buildAnnotatedString {
+                                        withStyle(style = SpanStyle(fontSize = 14.sp, color = Color.White)){
+                                            append(brawler.currTrophy)
+                                        }
+                                        withStyle(style = SpanStyle(fontSize = 10.sp, color = Color.White)){
+                                            append("("+brawler.minusTrophy+")")
+                                        }
+                                    })
                                 }
                             }
                             Column {

@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        compose_version = '1.6.0-alpha06'
+        compose_version = '1.6.0-alpha08'
     }
     dependencies {
         classpath 'com.google.gms:google-services:4.4.0'

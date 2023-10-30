@@ -58,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -76,15 +77,17 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.kal.brawlstatz2.broadcast.UpdateBroadcastReceiver
 import com.kal.brawlstatz2.data.BottomNavItem
 import com.kal.brawlstatz2.data.Events
-import com.kal.brawlstatz2.data.clubleague
 import com.kal.brawlstatz2.downloader.UpdateDownloader
 import com.kal.brawlstatz2.presentation.BrawlersList
 import com.kal.brawlstatz2.presentation.Curr
+import com.kal.brawlstatz2.presentation.MegaPig
 import com.kal.brawlstatz2.presentation.SetTrackerData
 import com.kal.brawlstatz2.presentation.ShimmerListItem
 import com.kal.brawlstatz2.presentation.ShimmerListItem1
 import com.kal.brawlstatz2.presentation.ShimmerListItem2
 import com.kal.brawlstatz2.presentation.ShowMetaList
+import com.kal.brawlstatz2.presentation.TrackerShimmer
+import com.kal.brawlstatz2.presentation.TrophyGraph
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
@@ -213,8 +216,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-//                NavHost(navController = navController2, startDestination = "main"){
-//                    composable("main"){
                         Scaffold(
                             topBar = {
                                 Column {
@@ -342,7 +343,7 @@ class MainActivity : ComponentActivity() {
                             },
 
                             floatingActionButton = {
-                                if (tabCurrent != "events") {
+                                if (tabCurrent != "events"&& tabCurrent!="tracker") {
 
 
                                     Column(horizontalAlignment = Alignment.End) {
@@ -458,7 +459,7 @@ class MainActivity : ComponentActivity() {
                                         ) {
                                             var angle = animateFloatAsState(
                                                 targetValue = if (fabExpanded) 1.0F else 0F,
-                                                animationSpec = tween(durationMillis = 1000)
+                                                animationSpec = tween(durationMillis = 1000),
                                             )
 
                                             Icon(
@@ -599,15 +600,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             }
-                        }//
-//                    }
-//                    composable("preview"){
-//                        var vm = viewModel<SceneViewModel>()
-//                        viewModel.previewBrawler.value?.let { it1 -> Preview3D(brawler = it1, context = applicationContext, viewModel = vm ) }
-//                    }
-//
-//                }
-
+                        }
             }
         }
 
@@ -615,7 +608,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun Navigation(navController: NavHostController, tag: String?,viewModel: MainViewModel, send: (String) -> Unit) {
-        //val viewModel = viewModel<MainViewModel>()
         val brawlers = viewModel.blist.value
         val meta = viewModel.nestedList.value
         val isLoading = viewModel.isLoading.value
@@ -678,13 +670,24 @@ class MainActivity : ComponentActivity() {
                         Box(
                             Modifier.fillMaxSize(),
                             contentAlignment = Center
-                        ) { CircularProgressIndicator(color = MaterialTheme.colorScheme.onBackground, strokeCap = StrokeCap.Round) }
+                        ) {
+                            TrackerShimmer()
+                        }
                     } else if (viewModel.isLoadingStats.value == 1) SetTrackerData(viewModel)
                     else {
-                        Box(
+                        Column(
                             Modifier.fillMaxSize(),
-                            contentAlignment = Center
-                        ) { Text(text = "Something went Wrong!") }
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) { 
+                            Text(text = "Something went Wrong!")
+                            Button(onClick = {
+                                viewModel.brawlStats(tag.toString())
+                            }) {
+                                Text(text = "RETRY")
+                            }
+                        }
+                        
                     }
                 } else {
                     GetTag(prevTag) {
@@ -899,8 +902,8 @@ fun SetDataMap(
     onclick: (String) -> Unit
 ) {
     val eventCardList = listOf(
-        Events("CURRENT", "curr", Color.Green, R.drawable.c1, !viewModel.apiLock.value),
-        Events("UPCOMING", "up", Color.Blue, R.drawable.c2, !viewModel.apiLock.value)
+        Events("CURRENT MAPS", "curr", Color.Green, R.drawable.c1, !viewModel.apiLock.value),
+        Events("UPCOMING MAPS", "up", Color.Blue, R.drawable.c2, !viewModel.apiLock.value)
     )
     Column(Modifier.padding(vertical = 6.dp)) {
         Row(Modifier.weight(3.1f)) {
@@ -970,13 +973,7 @@ fun SetDataMap(
                         .fillMaxSize(), contentAlignment = TopEnd
                 ) {
 
-                    val timeStamp: String = java.lang.String.valueOf(
-                        TimeUnit.MILLISECONDS.toSeconds(
-                            System.currentTimeMillis()
-                        )
-                    )
-                    val currtime: Long = timeStamp.toLong() * 1000
-                    val difTime = viewModel.bp.value[0].toLong().minus(currtime)
+                    val difTime = viewModel.bp.value[0].toLong().minus(viewModel.timeFromServer.value)
                     val dayLeft = difTime / 86400000
                     val hourLeft = (difTime % 86400000) / 3600000
                     val minLeft = ((difTime % 86400000) % 3600000) / 60000
@@ -1056,24 +1053,17 @@ fun SetDataMap(
             Spacer(modifier = Modifier.width(6.dp))
             Card(
                 Modifier
+                    .clickable {
+                    }
                     .weight(1f)
                     .fillMaxWidth()
-                    .clickable {
-                    },
 
                 ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize(), contentAlignment = TopEnd
                 ) {
-
-                    val timeStamp: String = java.lang.String.valueOf(
-                        TimeUnit.MILLISECONDS.toSeconds(
-                            System.currentTimeMillis()
-                        )
-                    )
-                    val currtime: Long = timeStamp.toLong() * 1000
-                    val difTime = viewModel.pl.value[0].toLong().minus(currtime)
+                    val difTime = viewModel.pl.value[0].toLong().minus(viewModel.timeFromServer.value)
                     val dayLeft = difTime / 86400000
                     val hourLeft = (difTime % 86400000) / 3600000
                     val minLeft = ((difTime % 86400000) % 3600000) / 60000
@@ -1143,261 +1133,14 @@ fun SetDataMap(
             Spacer(modifier = Modifier.width(6.dp))
         }
         Spacer(modifier = Modifier.height(6.dp))
-        val iscg = viewModel.cl.value[1] == "cg"
-        if (iscg) {
-            val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
-            val dayLeft = difTime / 86400000
-            val hourLeft = (difTime % 86400000) / 3600000
-            val minLeft = ((difTime % 86400000) % 3600000) / 60000
-            Card(
-                Modifier
-                    .weight(2.2f)
-                    .padding(horizontal = 4.dp)
-                    .clickable {},
+        Card(
+            Modifier
+                .weight(2.2f)
+                .padding(horizontal = 6.dp)
+                .clickable {},
 
-                ) {
-                Box {
-                    Image(
-                        painter = painterResource(id = R.drawable.clb),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.7f))
-                            .padding(10.dp)
-                    ) {
-                        Text(
-                            text = "CLUB GAMES",
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                textIndent = TextIndent(0.sp),
-                                fontSize = 20.sp
-                            ),
-                            modifier = Modifier.align(TopStart)
-                        )
-                        Text(
-                            text = "${dayLeft}d ${hourLeft}h ${minLeft}m", modifier = Modifier
-                                .align(
-                                    BottomEnd
-                                )
-                                .background(Color.Gray.copy(alpha = 0.3f))
-                                .align(
-                                    BottomEnd
-                                ),
-                            style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                textIndent = TextIndent(0.sp),
-                                color = if (dayLeft == 0L) Color.Red else Color.White
-                            )
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .align(
-                                    BottomStart
-                                )
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.cg),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(68.dp)
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column(modifier = Modifier.align(Bottom)) {
-                                Text(
-                                    "QUEST WEEK", color = Color.White,
-                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                        textIndent = TextIndent(0.sp),
-                                        fontSize = 18.sp
-                                    ), modifier = Modifier.offset(y = (4).dp)
-                                )
-                                Text(
-                                    "Complete quests with your club!", color = Color.White,
-                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                        textIndent = TextIndent(0.sp),
-                                        fontSize = 12.sp
-                                    )
-                                )
-                                Spacer(modifier = Modifier.height(3.dp))
-                            }
-                        }
-                        Column(
-                            horizontalAlignment = Alignment.End,
-                            modifier = Modifier.align(TopEnd)
-                        ) {
-                            Text(
-                                text = " Club League in", color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                    textIndent = TextIndent(0.sp),
-                                    fontSize = 12.sp
-                                )
-                            )
-                            Text(
-                                text =if(hourLeft+13>=24) "${dayLeft+1}d ${(hourLeft+13)%24}h" else "${dayLeft}d ${hourLeft+13}h",
-                                style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                    textIndent = TextIndent(0.sp),
-                                    fontSize = 12.sp,
-                                    color = if (dayLeft == 0L) Color.Red else Color.White
-                                ), modifier = Modifier.offset(y = (-4).dp)
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            val difTime = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value).plus(46800000)
-            val difTimeCg = viewModel.cl.value[0].toLong().minus(viewModel.timeFromServer.value)
-            val dayLeftCg = difTimeCg / 86400000
-            var hourLeftCg = (difTimeCg % 86400000) / 3600000
-            var minLeftCg = ((difTimeCg % 86400000) % 3600000) / 60000
-            val dayLeft = difTime / 86400000
-            var hourLeft = (difTime % 86400000) / 3600000
-            var minLeft = ((difTime % 86400000) % 3600000) / 60000
-
-            val clEvent = listOf(
-                clubleague(1, "EVENT DAY 1", 0, "Preparation !"),
-                clubleague(2, "EVENT DAY 1", 4, "Compete with your club!"),
-                clubleague(3, "EVENT DAY 2", 0, "Preparation !"),
-                clubleague(4, "EVENT DAY 2", 4, "Compete with your club!"),
-                clubleague(5, "EVENT DAY 3", 0, "Preparation !"),
-                clubleague(6, "EVENT DAY 3", 6, "Compete with your club!"),
-                clubleague(7, "EVENT ENDED", 0, "Club Games will start soon!")
-            )
-            var day=7 - dayLeft - 1
-            Card(
-                Modifier
-                    .weight(2.2f)
-                    .padding(horizontal = 6.dp)
-                    .clickable {},
             ) {
-                Box {
-                    Image(
-                        painter = painterResource(id = R.drawable.clb),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.7f))
-                            .padding(10.dp)
-                    ) {
-                        Text(
-                            text = "CLUB LEAGUE",
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                textIndent = TextIndent(0.sp),
-                                fontSize = 20.sp
-                            ),
-                            modifier = Modifier.align(TopStart)
-                        )
-                        Text(
-                            text = if (day == 6L) "ENDED" else "${if(day==-1L) hourLeft+24 else hourLeft}h ${minLeft}m",
-                            modifier = Modifier
-                                .align(
-                                    BottomEnd
-                                )
-                                .background(Color.Gray.copy(alpha = 0.3f))
-                                .align(
-                                    BottomEnd
-                                ),
-                            style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                textIndent = TextIndent(0.sp),
-                                color = if (dayLeft == 0L) Color.Red else Color.White
-                            )
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .align(
-                                    BottomStart
-                                )
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.pm),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(68.dp)
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column(modifier = Modifier.align(Bottom)) {
-                                Text(
-                                    clEvent[if(day==-1L)0 else day.toInt()].name, color = Color.White,
-                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                        textIndent = TextIndent(0.sp),
-                                        fontSize = 18.sp
-                                    ), modifier = Modifier.offset(y = (4).dp)
-                                )
-                                Text(
-                                    clEvent[if(day==-1L)0 else day.toInt()].text, color = Color.White,
-                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                        textIndent = TextIndent(0.sp),
-                                        fontSize = 12.sp
-                                    )
-                                )
-                                Spacer(modifier = Modifier.height(3.dp))
-                            }
-                        }
-                        if (clEvent[if(day==-1L)0 else day.toInt()].ticket != 0) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.align(CenterEnd)
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ct),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                )
-                                Text(
-                                    text = " x${clEvent[if(day==-1L)0 else day.toInt()].ticket}", color = Color.White,
-                                    style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                        shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                        textIndent = TextIndent(0.sp),
-                                        fontSize = 20.sp
-                                    )
-                                )
-                            }
-                        }
-                        Column(
-                            horizontalAlignment = Alignment.End,
-                            modifier = Modifier.align(TopEnd)
-                        ) {
-                            Text(
-                                text = " Club Games in", color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                    textIndent = TextIndent(0.sp),
-                                    fontSize = 12.sp
-                                )
-                            )
-                            Text(
-                                text = if(dayLeftCg!=0L)"${dayLeftCg}d ${hourLeftCg}h" else "0d ${hourLeftCg}h ${minLeftCg}m",
-                                style = MaterialTheme.typography.bodyMedium + TextStyle(
-                                    shadow = Shadow(offset = Offset(1f, 1f), blurRadius = 20f),
-                                    textIndent = TextIndent(0.sp),
-                                    fontSize = 12.sp,
-                                    color = if (dayLeft == 0L) Color.Red else Color.White
-                                ), modifier = Modifier.offset(y = (-4).dp)
-                            )
-                        }
-                    }
-                }
-            }
+            MegaPig(viewModel = viewModel)
         }
     }
 }

@@ -50,7 +50,9 @@ import com.kal.brawlstatz2.viewmodel.MetaViewModel
 @Composable
 fun ShowMetaList(nestedList: List<MetaTier> , sortedMetaList : ArrayList<Brawler>) {
     val cardModel = viewModel<MetaViewModel>()
-    LazyColumn() {
+    LazyColumn(
+        modifier = Modifier.clip(RoundedCornerShape(topEnd = 20.dp, topStart = 20.dp))
+    ) {
         item {
             Spacer(modifier = Modifier.height(4.dp))
         }
