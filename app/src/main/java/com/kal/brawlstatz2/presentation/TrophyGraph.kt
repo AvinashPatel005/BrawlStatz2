@@ -39,7 +39,7 @@ fun TrophyGraph(str: ArrayList<Int>) {
     val yMax = pointsData.maxOf { it.y }
     val yMin = pointsData.minOf { it.y }
     val xAxisData = AxisData.Builder()
-        .axisStepSize(30.dp)
+        .axisStepSize(15.dp)
         .steps(25)
         .axisLineColor(MaterialTheme.colorScheme.background)
         .backgroundColor(MaterialTheme.colorScheme.primaryContainer)
@@ -60,11 +60,12 @@ fun TrophyGraph(str: ArrayList<Int>) {
             lines = listOf(
                 Line(
                     dataPoints = pointsData,
-                    lineStyle = LineStyle(lineType = LineType.Straight(), MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)),
+                    lineStyle = LineStyle(lineType = LineType.Straight(), MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f), width =6f),
                     IntersectionPoint(
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        radius = 5.dp
                     ),
-                    SelectionHighlightPoint(isHighlightLineRequired = false, style = Stroke(10f)),
+                    SelectionHighlightPoint(isHighlightLineRequired = false, style = Stroke(4f)),
                     ShadowUnderLine(),
                     SelectionHighlightPopUp(popUpLabel = {_,j->
                         j.toInt().toString()

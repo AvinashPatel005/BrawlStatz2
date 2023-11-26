@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.Bottom
 import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
@@ -58,7 +57,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -87,15 +85,16 @@ import com.kal.brawlstatz2.presentation.ShimmerListItem1
 import com.kal.brawlstatz2.presentation.ShimmerListItem2
 import com.kal.brawlstatz2.presentation.ShowMetaList
 import com.kal.brawlstatz2.presentation.TrackerShimmer
-import com.kal.brawlstatz2.presentation.TrophyGraph
 import com.kal.brawlstatz2.ui.theme.*
 import com.kal.brawlstatz2.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
-import java.util.concurrent.TimeUnit
+import java.io.FileInputStream
+import java.io.IOException
+import java.util.Arrays
+
 
 class MainActivity : ComponentActivity() {
     private var prevTag = ""
-
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -106,6 +105,7 @@ class MainActivity : ComponentActivity() {
             val token = task.result
             Log.d(TAG, token)
         })
+
         installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
@@ -205,7 +205,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 LaunchedEffect(key1 = viewModel.previewBrawler.value){
-                    if(viewModel.previewBrawler.value!=null) Intent(applicationContext,previewActivity::class.java).also {
+                    if(viewModel.previewBrawler.value!=null) Intent(applicationContext,PreviewActivity::class.java).also {
                         var bundle = Bundle()
                         var parcel = viewModel.previewBrawler.value
                         bundle.putParcelable("preview",parcel)

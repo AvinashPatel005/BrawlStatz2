@@ -87,7 +87,6 @@ fun ModelScreen(file:String) {
                     onHitResult ={node, hitResult ->
                         placeModel=node.isTracking
                     }
-
                 }
                 nodes.add(modelNode!!)
 

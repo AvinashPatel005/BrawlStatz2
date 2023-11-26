@@ -10,7 +10,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,7 +72,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class previewActivity : ComponentActivity() {
+class PreviewActivity : ComponentActivity() {
     @SuppressLint("Range", "CoroutineCreationDuringComposition")
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
