@@ -20,8 +20,8 @@ android {
         applicationId "com.kal.brawlstatz2"
         minSdk 26
         targetSdk 34
-        versionCode 45
-        versionName "6.0"
+        versionCode 46
+        versionName "6.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -60,10 +60,10 @@ dependencies {
 
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
-    implementation 'androidx.activity:activity-compose:1.8.0'
+    implementation 'androidx.activity:activity-compose:1.8.1'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    implementation 'androidx.compose.material3:material3:1.2.0-alpha10'
+    implementation 'androidx.compose.material3:material3:1.2.0-alpha12'
     implementation 'com.google.firebase:firebase-database-ktx:20.3.0'
     implementation 'com.google.firebase:firebase-messaging-ktx:23.3.1'
     implementation 'com.google.firebase:firebase-analytics-ktx:21.5.0'
@@ -89,8 +89,8 @@ dependencies {
     implementation "com.google.code.gson:gson:2.10.1"
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation ("org.jsoup:jsoup:1.16.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("io.github.sceneview:arsceneview:0.10.2")
     implementation("co.yml:ycharts:2.1.0")
 }
